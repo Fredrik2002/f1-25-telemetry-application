@@ -2,8 +2,6 @@ from Session import Session
 from Player import Player
 from dictionnaries import *
 import json
-from parser2023 import Listener
-import math
 import time
 from ttkbootstrap import Toplevel, LEFT, Entry, IntVar, Label
 from tkinter import Message, Checkbutton, Button
@@ -162,6 +160,7 @@ def update_car_damage(packet):  # Packet 10
         element = packet.m_car_damage_data[index]
         joueur = LISTE_JOUEURS[index]
         joueur.tyre_wear = '[' + ', '.join('%.2f'%truc for truc in element.m_tyres_wear) + ']'
+        joueur.tyre_blisters = '[' + ', '.join(str(truc) for truc in element.m_tyre_blisters) + ']'
         joueur.FrontLeftWingDamage = element.m_front_left_wing_damage
         joueur.FrontRightWingDamage = element.m_front_right_wing_damage
         joueur.rearWingDamage = element.m_rear_wing_damage
@@ -223,6 +222,7 @@ def delete_map(map_canvas):
         joueur.oval = None
 
 def update_map(map_canvas):
+    if session.track==-1: return
     _, d, x, z = track_dictionary[session.track]
     for joueur in LISTE_JOUEURS:
         if joueur.position != 0:
@@ -272,7 +272,7 @@ def UDP_Redirect(dictionnary_settings, listener, PORT):
             dictionnary_settings["redirect_active"] = var1.get()
             dictionnary_settings["ip_adress"] = e1.get()
             dictionnary_settings["redirect_port"] = e2.get()
-            with open("settings.txt", "w") as f:
+            with open("../settings.txt", "w") as f:
                 json.dump(dictionnary_settings, f)
             win.destroy()
 
@@ -301,7 +301,7 @@ def port_selection(dictionnary_settings, listener, PORT):
             listener.reset()
             Label(win, text="").grid(row=3, column=0)
             dictionnary_settings["port"] = str(PORT[0])
-            with open("settings.txt", "w") as f:
+            with open("../settings.txt", "w") as f:
                 json.dump(dictionnary_settings, f)
             win.destroy()
 

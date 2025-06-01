@@ -4,14 +4,25 @@ import threading
 import os
 import datetime
 
-PORT = 20776
+from debugpy.common.timestamp import current
+from flask import redirect
+
+PORT = 20777
 string = ""
 
-socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-socket.bind(('', PORT))
-socket.setblocking(False)
+REDIRECT = True
+REDIRECT_PORT = 20790
+REDIRECT_ADDRESS = "127.0.0.1"
 
-PATH = "datas2.txt"
+socket_recv = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+socket_send = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+
+socket_recv.bind(('', PORT))
+socket_recv.setblocking(False)
+
+current_time = str(datetime.datetime.now())
+
+PATH = "E:/Data_samples/F1 25/" + current_time.split(".")[0].replace(":", "-")
 
 if os.path.isfile(PATH):
     print(f"WARNING : The file {PATH} already exists, it will be overwritten if you continue.")
@@ -20,7 +31,8 @@ if os.path.isfile(PATH):
         print(f"The file {PATH} will be overwritten.")
     else:
         print(f"Please change the PATH variable if you don't want the {PATH} file to be overwritten, and re-run the program.")
-        socket.close()
+        socket_recv.close()
+        socket_send.close()
         exit(0)
 
 file = open(PATH, 'wb')
@@ -30,7 +42,10 @@ def main():
     L=[]
     while string!="stop":
         try:
-            L.append(socket.recv(2048))
+            packet = socket_recv.recv(2048)
+            L.append(packet)
+            if redirect:
+                socket_send.sendto(packet, (REDIRECT_ADDRESS, REDIRECT_PORT))
         except BlockingIOError:
             pass
     print(f"\nRecording finished : Storing {len(L)} packets in {PATH}, this may take a few time, please wait")
@@ -38,7 +53,8 @@ def main():
     pickle.dump(L, file)
     file.close()
     print(f"\nDatas stored in {PATH} with success !")
-    socket.close()
+    socket_recv.close()
+    socket_send.close()
     exit(0)
 
 

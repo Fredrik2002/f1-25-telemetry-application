@@ -1,4 +1,4 @@
-from ttkbootstrap import Window, Notebook, Frame, Canvas, Menu, Label
+from ttkbootstrap import Window, Notebook, Frame, Canvas, Menu
 import sys
 
 screen = Window(themename="darkly")
@@ -6,8 +6,7 @@ screen = Window(themename="darkly")
 from packet_management import *
 import json
 import time
-from dictionnaries import *
-from parser2024 import Listener
+from src.parsers.parser2025 import Listener
 from Custom_Frame import Players_Frame, Packet_Reception_Frame, Weather_Forecast_Frame
 
 
@@ -70,10 +69,10 @@ indice 7,27,28,29
 '''
 
 
-packet_received = [0]*15
+packet_received = [0]*16
 last_update = time.time()
 
-with open("settings.txt", "r") as f:
+with open("../settings.txt", "r") as f:
     dictionnary_settings = json.load(f)
 
 if len(sys.argv)==2:
@@ -110,7 +109,8 @@ function_hashmap = { #PacketId : (fonction, arguments)
     11: (nothing, ()),
     12: (nothing, ()),
     13: (nothing, ()),
-    14: (nothing, ())
+    14: (nothing, ()),
+    15: (nothing, ())
 
 }
 
@@ -125,7 +125,7 @@ while running:
         last_update = time.time()
         LISTE_FRAMES[7].update(packet_received) #Packet Received tab
         session.packet_received = packet_received[:]
-        packet_received = [0]*15
+        packet_received = [0]*16
     screen.update()
     screen.update_idletasks()
     

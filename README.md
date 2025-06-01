@@ -28,8 +28,9 @@ The goal of this project is to make the most important data from the in-game EA 
 - ✅ Current, best, and last lap times, along with sector times for all cars, depending on the session type
 - ✅ ERS & Fuel management information as well as time penalties for all cars
 - ✅ Weather forecast for upcoming sessions, including track and air temperature
-- ✅ Option to choose the port for receiving data
-- ✅ Option to redirect received data to another IP address and port (to share data with a friend or another application)
+- ✅ Setting tab
+  -  Option to choose the port for receiving data
+  -  Option to redirect received data to another IP address and port (to share data with a friend or another application)
 - ✅ Compatibility with older parsers for previous EA F1 games (F1 22 & F1 23)
 
 
@@ -69,4 +70,7 @@ Open the F1 Game :
 ## ✏️ To-do list <a id="to-do-list"></a>
 * Fix the issue with weather Forecast Sample in 100% (Too many samples ?)
 * Improve the overall appearance of the app (flag apparition, title)
+* Track a bug where all not cars are shown in the minimap during full qualifying session
+* Track a bug in full qualifying, session.nb_players might return 8 if 2 players retired instead of 10 anyway
+
 

@@ -8,7 +8,7 @@ PORT = 20777
 if len(sys.argv)>1:
     PORT = int(sys.argv[1])
 
-with open('datas.txt', 'rb') as file:
+with open('E:\Data_samples\F1 23\Brazil_race_8-11-2.txt', 'rb') as file:
     b = pickle.load(file)
 i=0
 

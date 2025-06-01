@@ -5,6 +5,7 @@ class Player:
     def __init__(self):
         self.position: int = 0
         self.tyre_wear = []
+        self.tyre_blisters = []
         self.tyres = 0
         self.warnings = 0
         self.ERS_mode = -1
@@ -66,7 +67,7 @@ class Player:
 
         elif buttonId == 1:  # Dégâts
             return (f"P{self.position}, {self.name} "
-                    f"usure = {self.tyre_wear}, FW = [{self.FrontLeftWingDamage},  "
+                    f"usure = {self.tyre_wear}, blisters = {self.tyre_blisters}, FW = [{self.FrontLeftWingDamage},  "
                     f"{self.FrontRightWingDamage}] | "
                     f"RW ={self.rearWingDamage} | "
                     f"floor = {self.floorDamage} | "

@@ -73,7 +73,10 @@ track_dictionary = { #(track name, highNumber=Small on canvas, x_offset, y_offse
     29: ("jeddah", 4,500, 350),
     30:("Miami", 2,400,300),
     31:("Las Vegas", 4,400, 300),
-    32:("Losail", 2.5,400,300)
+    32:("Losail", 2.5,400,300),
+    39: ("silverstone", 3.5, 400, 250),
+    40: ("austria", 2, 300, 300),
+    41: ("zandvoort", 2, 500, 300),
 }
 
 teams_color_dictionary = {
@@ -174,7 +177,8 @@ packetDictionnary = {
     11:"SessionHistoryPacket",
     12:"TyreSets",
     13:"MotionEx",
-    14:"Time Trial"
+    14:"Time Trial",
+    15:"Lap Positions"
 
 }
 

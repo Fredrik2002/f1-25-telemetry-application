@@ -35,13 +35,13 @@ class Players_Frame(Custom_Frame):
 
     def update(self, LISTE_JOUEURS:list[Player], session):
         if session.Seance != 18:
-            for i in range(session.nb_players):
+            for i in range(22):
                 joueur = LISTE_JOUEURS[i]
                 frame, label = self.liste_frame[joueur.position-1]
                 label.config(text=joueur.printing(self.id, LISTE_JOUEURS, session.Seance), foreground=teams_color_dictionary[joueur.teamId])
                 self.label_tyres[joueur.position-1].config(text=tyres_dictionnary[joueur.tyres], foreground=tyres_color_dictionnary[joueur.tyres])
-            for i in range(session.nb_players, self.n_lines):
-                label.config(text="")
+            for i in range(session.nb_players, self.n_lines): # TODO
+                self.liste_frame[i][1].config(text="")
                 self.label_tyres[i].config(text="")
         else:
             joueur = LISTE_JOUEURS[0]

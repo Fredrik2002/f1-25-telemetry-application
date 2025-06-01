@@ -1,4 +1,4 @@
-from parser2023 import Listener
+from src.parsers.parser2023 import Listener
 track = "portimao"
 
 PORT=20777
