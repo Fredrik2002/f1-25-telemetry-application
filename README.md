@@ -1,4 +1,4 @@
-# F1 24 Telemetry Application
+# F1 25 Telemetry Application
 
 ## Table of Contents
 
@@ -11,7 +11,7 @@
 - [To-do List](#to-do-list)
 
 ## 🔍 Overview <a id="overview"></a>
-The goal of this project is to make the most important data from the in-game EA F1 24 telemetry system easily accessible.
+The goal of this project is to make the most important data from the in-game EA F1 25 telemetry system easily accessible.
 
 ![Telemetry map](https://github.com/Fredrik2002/f1-23-telemetry-application/assets/86866135/7b1ce85e-f57d-4861-b7f5-10bee4ad9b11)
 
@@ -31,7 +31,7 @@ The goal of this project is to make the most important data from the in-game EA 
 - ✅ Setting tab
   -  Option to choose the port for receiving data
   -  Option to redirect received data to another IP address and port (to share data with a friend or another application)
-- ✅ Compatibility with older parsers for previous EA F1 games (F1 22 & F1 23)
+- ✅ Compatibility with older parsers for previous EA F1 games (F1 22, F1 23, F1 24)
 
 
 ## 🔧 Usage <a id="usage"></a>
@@ -64,7 +64,7 @@ Open the F1 Game :
 * *packet_management.py* : Stores the different packets information into various players and session instances
 * *dictionnaries.py* : This is where all the different dictionnaries are stored
 * *Custom_Frame.py* : This is where the main frame is created
-* *parser202x.py* : Parses the data received for the F1 2x game (default for F1 24)
+* *parser202x.py* : Parses the data received for the F1 2x game (default for F1 25)
 * *settings.txt* : This files saves the previous connection settings (so you don't have to enter the same port selection and UDP redirection every time). Do not touch unless you know what you are doing
 
 ## ✏️ To-do list <a id="to-do-list"></a>
@@ -72,5 +72,6 @@ Open the F1 Game :
 * Improve the overall appearance of the app (flag apparition, title)
 * Track a bug where all not cars are shown in the minimap during full qualifying session
 * Track a bug in full qualifying, session.nb_players might return 8 if 2 players retired instead of 10 anyway
+* Last player not correctly displayed
 
 

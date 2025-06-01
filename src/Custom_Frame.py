@@ -31,7 +31,6 @@ class Players_Frame(Custom_Frame):
             self.liste_frame[i][1].pack_forget()
             self.liste_frame[i][1].pack(side='left')
             self.label_tyres.append(label)
-        # Insère le label pour les pneus
 
     def update(self, LISTE_JOUEURS:list[Player], session):
         if session.Seance != 18:
@@ -40,7 +39,7 @@ class Players_Frame(Custom_Frame):
                 frame, label = self.liste_frame[joueur.position-1]
                 label.config(text=joueur.printing(self.id, LISTE_JOUEURS, session.Seance), foreground=teams_color_dictionary[joueur.teamId])
                 self.label_tyres[joueur.position-1].config(text=tyres_dictionnary[joueur.tyres], foreground=tyres_color_dictionnary[joueur.tyres])
-            for i in range(session.nb_players, self.n_lines): # TODO
+            for i in range(session.nb_players, self.n_lines):
                 self.liste_frame[i][1].config(text="")
                 self.label_tyres[i].config(text="")
         else:
