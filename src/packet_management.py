@@ -1,6 +1,7 @@
 import time
 from tkinter import Message, Button
 
+from pydantic.v1.typing import LITERAL_TYPES
 from ttkbootstrap import Toplevel, Entry, Label
 
 from Custom_Frame import Custom_Frame
@@ -9,10 +10,7 @@ from src.map_management import *
 
 
 def update_motion(packet, map_canvas, *args):  # Packet 0
-    for i in range(session.nb_players):
-        if LISTE_JOUEURS[i].worldPositionX != 0:
-            LISTE_JOUEURS[i].Xmove = packet.m_car_motion_data[i].m_world_position_x - LISTE_JOUEURS[i].worldPositionX
-            LISTE_JOUEURS[i].Zmove = packet.m_car_motion_data[i].m_world_position_z - LISTE_JOUEURS[i].worldPositionZ
+    for i in range(22):
         LISTE_JOUEURS[i].worldPositionX = packet.m_car_motion_data[i].m_world_position_x
         LISTE_JOUEURS[i].worldPositionZ = packet.m_car_motion_data[i].m_world_position_z
     try:
