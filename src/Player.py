@@ -1,4 +1,5 @@
 from dictionnaries import *
+from utils import conversion
 
 
 class Player:

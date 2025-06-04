@@ -1,5 +1,5 @@
-from dictionnaries import session_dictionary, conversion, track_dictionary, weather_dictionary, color_flag_dict
-
+from dictionnaries import session_dictionary, track_dictionary, weather_dictionary, color_flag_dict
+from src.utils import conversion
 
 class WeatherForecastSample:
     def __init__(self, time, weather, tktp, airtp, rainP):

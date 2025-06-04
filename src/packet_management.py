@@ -1,20 +1,12 @@
-from Session import Session
-from Player import Player
-from dictionnaries import *
-import json
 import time
-from ttkbootstrap import Toplevel, LEFT, Entry, IntVar, Label
-from tkinter import Message, Checkbutton, Button
-from Custom_Frame import Custom_Frame
-import traceback
+from tkinter import Message, Button
 
-LISTE_JOUEURS: list[Player] = []
-session: Session = Session()
-created_map = False
-WIDTH_POINTS = 6
-LISTE_FRAMES = []
-liste_button: list = ["Main Menu", "Damage", "Temperatures", "Laps", "Map", "ERS & Fuel", "Weather Forecast",
-                              "Packet Reception"]
+from ttkbootstrap import Toplevel, Entry, Label
+
+from Custom_Frame import Custom_Frame
+from dictionnaries import *
+from src.map_management import *
+
 
 def update_motion(packet, map_canvas, *args):  # Packet 0
     for i in range(session.nb_players):
@@ -25,12 +17,9 @@ def update_motion(packet, map_canvas, *args):  # Packet 0
         LISTE_JOUEURS[i].worldPositionZ = packet.m_car_motion_data[i].m_world_position_z
     try:
         update_map(map_canvas)
-    except Exception as e:
-        try:
-            traceback.print_exc()
-            create_map(map_canvas)
-        except Exception as e :
-            pass
+    except Exception as e: # The map is not created yet
+        create_map(map_canvas)
+
 
 def update_session(packet, top_frame1, top_frame2, screen, map_canvas):  # Packet 1
     global created_map
@@ -50,7 +39,6 @@ def update_session(packet, top_frame1, top_frame2, screen, map_canvas):  # Packe
     session.clear_slot()
     if packet.m_num_weather_forecast_samples != session.nb_weatherForecastSamples:
         session.nb_weatherForecastSamples = packet.m_num_weather_forecast_samples
-        #Reconstruire le tableau 
     for i in range(session.nb_weatherForecastSamples):
         slot = packet.m_weather_forecast_samples[i]
         session.add_slot(slot)
@@ -120,7 +108,7 @@ def update_participants(packet):  # Packet 4
         except:
             joueur.name = element.m_name
         session.nb_players = packet.m_num_active_cars
-        if joueur.name in ['Player', 'Joueur']:
+        if joueur.name in ['Pilote', 'Driver']: # More translations appreciated
             joueur.name = teams_name_dictionary[joueur.teamId] + "#" + str(joueur.numero)
     update_frame(LISTE_FRAMES, LISTE_JOUEURS, session)
 
@@ -172,114 +160,7 @@ def update_car_damage(packet):  # Packet 10
 def nothing(packet):# Packet 8, 9, 11, 12, 13
     pass
 
-def create_map(map_canvas):
-    cmi = 1
-    L0, L1 = [], []
-    L = []
-    name, d, x_const, z_const = track_dictionary[session.track]
-    with open(f"tracks/{name}_2020_racingline.txt", "r") as file:
-        for index, line in enumerate(file):
-            if index not in [0, 1]:
-                dist, z, x, y, _, _ = line.strip().split(",")
-                if cmi == 1:
-                    L0.append((float(z) / d + x_const, float(x) / d + z_const))
-                elif cmi == session.num_marshal_zones:
-                    L1.append((float(z) / d + x_const, float(x) / d + z_const))
-                else:
-                    L.append((float(z) / d + x_const, float(x) / d + z_const))
-                if (float(dist) / session.trackLength) > session.marshalZones[cmi].m_zone_start and cmi!=session.num_marshal_zones:
-                    if cmi != 1:
-                        session.segments.append(map_canvas.create_line(L, width=3))
-                        L = []
-                    cmi +=1
-    session.segments.insert(0, map_canvas.create_line(L1+L0, width=3))
-    for i in range(20):
-        joueur = LISTE_JOUEURS[i]
-        if session.Seance == 18 and i!=0:
-            joueur.oval = map_canvas.create_oval(-1000 / d + x_const - WIDTH_POINTS,
-                                                -1000 / d + z_const - WIDTH_POINTS,
-                                                -1000 / d + x_const + WIDTH_POINTS,
-                                                -1000 / d + z_const + WIDTH_POINTS, outline="")
-        else:
-            joueur.oval = map_canvas.create_oval(joueur.worldPositionX / d + x_const - WIDTH_POINTS,
-                                                joueur.worldPositionZ / d + z_const - WIDTH_POINTS,
-                                                joueur.worldPositionX / d + x_const + WIDTH_POINTS,
-                                                joueur.worldPositionZ / d + z_const + WIDTH_POINTS, outline="")
-            
-            joueur.etiquette = map_canvas.create_text(joueur.worldPositionX / d + x_const + 25,
-                                                    joueur.worldPositionZ / d + z_const - 25,
-                                                    text=joueur.name, font=("Cousine", 13))
-            map_canvas.moveto(joueur.oval, joueur.worldPositionX / d + x_const - WIDTH_POINTS,
-                                joueur.worldPositionZ / d + z_const - WIDTH_POINTS)
 
-def delete_map(map_canvas):
-    for element in session.segments:
-        map_canvas.delete(element)
-    session.segments = []
-    for joueur in LISTE_JOUEURS:
-        map_canvas.delete(joueur.oval)
-        map_canvas.delete(joueur.etiquette)
-        joueur.oval = None
-
-def update_map(map_canvas):
-    if session.track==-1: return
-    _, d, x, z = track_dictionary[session.track]
-    for joueur in LISTE_JOUEURS:
-        if joueur.position != 0:
-            map_canvas.move(joueur.oval, joueur.Xmove / d, joueur.Zmove / d)
-            map_canvas.itemconfig(joueur.oval, fill=teams_color_dictionary[joueur.teamId])
-            map_canvas.move(joueur.etiquette, joueur.Xmove / d, joueur.Zmove / d)
-            map_canvas.itemconfig(joueur.etiquette, fill=teams_color_dictionary[joueur.teamId], text=joueur.name)
-    for i in range(len(session.segments)):
-        map_canvas.itemconfig(session.segments[i], fill=color_flag_dict[session.marshalZones[i].m_zone_flag])
-    session.anyYellow = any(item.m_zone_flag==3 for item in session.marshalZones)
-        
-def init_20_players():
-    for _ in range(22):
-        LISTE_JOUEURS.append(Player())
-
-def UDP_Redirect(dictionnary_settings, listener, PORT):
-    win = Toplevel()
-    win.grab_set()
-    win.wm_title("UDP Redirect")
-    var1 = IntVar(value=dictionnary_settings["redirect_active"])
-    checkbutton = Checkbutton(win, text="UDP Redirect", variable=var1, onvalue=1, offvalue=0, font=("Arial", 16))
-    checkbutton.grid(row=0, column=0, sticky="W", padx=30, pady=10)
-    Label(win, text="IP Address", font=("Arial", 16), justify=LEFT).grid(row=1, column=0, pady=10)
-    e1 = Entry(win, font=("Arial", 16))
-    e1.insert(0, dictionnary_settings["ip_adress"])
-    e1.grid(row=2, column=0)
-    Label(win, text="Port", font=("Arial", 16)).grid(row=3, column=0, pady=(10, 5))
-    e2 = Entry(win, font=("Arial", 16))
-    e2.insert(0, dictionnary_settings["redirect_port"])
-    e2.grid(row=4, column=0, padx=30)
-
-    def button():
-        redirect_port = e2.get()
-        if not redirect_port.isdigit() or not 1000 <= int(redirect_port) <= 65536:
-            Message(win, text="The PORT must be an integer between 1000 and 65536", fg="red", font=("Arial", 16)).grid(
-                row=6, column=0)
-        elif not valid_ip_address(e1.get()):
-            Label(win, text="IP Address incorrect", foreground="red", font=("Arial", 16)).grid(
-                row=6, column=0)
-        else:
-            listener.port = int(PORT[0])
-            listener.redirect = int(var1.get())
-            listener.adress = e1.get()
-            listener.redirect_port = int(e2.get())
-            Label(win, text="").grid(row=3, column=0)
-
-            dictionnary_settings["redirect_active"] = var1.get()
-            dictionnary_settings["ip_adress"] = e1.get()
-            dictionnary_settings["redirect_port"] = e2.get()
-            with open("../settings.txt", "w") as f:
-                json.dump(dictionnary_settings, f)
-            win.destroy()
-
-    win.bind('<Return>', lambda e: button())
-    win.bind('<KP_Enter>', lambda e: button())
-    b = Button(win, text="Confirm", font=("Arial", 16), command=button)
-    b.grid(row=5, column=0, pady=10)
 
 def port_selection(dictionnary_settings, listener, PORT):
     win = Toplevel()

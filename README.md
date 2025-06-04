@@ -45,8 +45,7 @@ pip install tkinter ttkbootstrap PIL
 
 ### <ins>Step 2 : Send datas to the application </ins> <a id="step2"></a>
 Open the F1 Game :
-- ➡️ Go to Settings 
-- ➡️ Telemetry Settings
+- ➡️ Go to Settings, Telemetry Settings
 - ➡️ Make sure the port in-game matches the port used by the application (20777 by default)
 - ➡️ **If your game is connected to the same network as your computer running this application**, the easiest way is to enable the <u>UDP Broadcast</u> setting.
 **If not**, you have to enter your public IP address in the <u>IP Address</u> setting.
@@ -72,6 +71,12 @@ Open the F1 Game :
 * Improve the overall appearance of the app (flag apparition, title)
 * Track a bug where all not cars are shown in the minimap during full qualifying session
 * Track a bug in full qualifying, session.nb_players might return 8 if 2 players retired instead of 10 anyway
-* Last player not correctly displayed
+* Improving map appearance
+* Add race control panel
+* Gaps not working properly
+
+Telemetry issues :
+* Check glitch on the grid where track_id is correctly set but marshals_zones are set to 0
+Try 2024 version
 
 

@@ -1,6 +1,6 @@
 from ttkbootstrap import Frame, Label
 from Player import Player
-from dictionnaries import teams_color_dictionary, packetDictionnary, tyres_dictionnary, tyres_color_dictionnary, grey
+from src.dictionnaries import teams_color_dictionary, packetDictionnary, tyres_dictionnary, tyres_color_dictionnary, grey
 from Session import Session
 
 
@@ -36,6 +36,8 @@ class Players_Frame(Custom_Frame):
         if session.Seance != 18:
             for i in range(22):
                 joueur = LISTE_JOUEURS[i]
+                if joueur.position == 0:
+                    continue
                 frame, label = self.liste_frame[joueur.position-1]
                 label.config(text=joueur.printing(self.id, LISTE_JOUEURS, session.Seance), foreground=teams_color_dictionary[joueur.teamId])
                 self.label_tyres[joueur.position-1].config(text=tyres_dictionnary[joueur.tyres], foreground=tyres_color_dictionnary[joueur.tyres])
