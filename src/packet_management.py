@@ -4,8 +4,8 @@ from tkinter import Message, Button
 from pydantic.v1.typing import LITERAL_TYPES
 from ttkbootstrap import Toplevel, Entry, Label
 
-from Custom_Frame import Custom_Frame
-from dictionnaries import *
+from src.Custom_Frame import Custom_Frame
+from src.dictionnaries import *
 from src.map_management import *
 
 

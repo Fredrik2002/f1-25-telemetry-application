@@ -5,7 +5,7 @@ import src.Player as Player
 import json
 import sys
 
-with open("../settings.txt", "r") as f:
+with open("../../settings.txt", "r") as f:
     dictionnary_settings = json.load(f)
 
 if len(sys.argv)==2:

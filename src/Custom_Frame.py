@@ -1,7 +1,7 @@
 from ttkbootstrap import Frame, Label
-from Player import Player
+from src.Player import Player
 from src.dictionnaries import teams_color_dictionary, packetDictionnary, tyres_dictionnary, tyres_color_dictionnary, grey
-from Session import Session
+from src.Session import Session
 
 
 class Custom_Frame(Frame): # Frame Tableau

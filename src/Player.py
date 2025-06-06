@@ -1,5 +1,5 @@
-from dictionnaries import *
-from utils import conversion
+from src.dictionnaries import *
+from src.utils import conversion
 
 
 class Player:

@@ -1,4 +1,4 @@
-from dictionnaries import session_dictionary, track_dictionary, weather_dictionary, color_flag_dict
+from src.dictionnaries import session_dictionary, track_dictionary, weather_dictionary, color_flag_dict
 from src.utils import conversion
 
 class WeatherForecastSample:
