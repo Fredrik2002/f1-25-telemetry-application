@@ -31,12 +31,11 @@ tyres_dictionnary = {
 }
 
 tyres_color_dictionnary = {
-    0:"#FF0000",
-    16: "#FF0000",
-    17: "#FFD700",
-    18: "#FFFFFF",
-    7: "#00FF00",
-    8: "#0000FF"
+    "S": "#FF0000",
+    "M": "#FFD700",
+    "H": "#FFFFFF",
+    "I": "#00FF00",
+    "W": "#0000FF"
 }
 
 track_dictionary = { #(track name, highNumber=Small on canvas, x_offset, y_offset)
@@ -111,12 +110,12 @@ teams_name_dictionary = {
 }
 
 weather_dictionary = {
-    0: "Dégagé",
-    1: "Légèrement nuageux",
-    2: "Couvert",
-    3: "Pluie fine",
-    4: "Pluie forte",
-    5: "Tempête"
+    0: "Clear",
+    1: "Light Cloud",
+    2: "Overcast",
+    3: "Light Rain",
+    4: "Heavy Rain",
+    5: "Storm"
 }
 
 fuel_dict = {
@@ -137,7 +136,7 @@ ERS_dictionary = {
     1: "MEDIUM",
     2: "HOTLAP",
     3: "OVERTAKE",
-    -1: "PRIVÉE"
+    -1: "PRIVATE"
 }
 
 session_dictionary = {
@@ -157,7 +156,7 @@ DRS_dict = {0: "", 1: "DRS"}
 
 WeatherForecastAccuracy = {
     -1: "Unknown",
-    0: "Parfaite",
+    0: "Perfect",
     1: "Approximative"
 }
 

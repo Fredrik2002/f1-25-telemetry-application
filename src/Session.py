@@ -1,4 +1,4 @@
-from dictionnaries import session_dictionary, track_dictionary, weather_dictionary, color_flag_dict
+from src.dictionnaries import session_dictionary, track_dictionary, weather_dictionary, color_flag_dict
 from src.utils import conversion
 
 class WeatherForecastSample:
@@ -32,7 +32,7 @@ class Session:
         self.track = -1
         self.marshalZones = []
         self.idxBestLapTime = -1
-        self.bestLapTime = 5000
+        self.fastestLapTime = 5000
         self.safetyCarStatus = 0
         self.trackLength = 0
         self.weatherList: list[WeatherForecastSample] = []

@@ -1,46 +1,225 @@
 import sys
-from PyQt6.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
-    QTabWidget, QTableWidget, QTableWidgetItem
+
+sys.path.append(".")
+sys.path.append("..")
+sys.path.append("../src")
+
+from PyQt5.QtGui import QColor, QFont
+from PyQt5.QtWidgets import (
+    QApplication, QMainWindow, QTableView, QVBoxLayout, QWidget, QTabWidget, QHBoxLayout, QLabel
 )
+from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QThread, pyqtSignal
+
+from src.dictionnaries import tyres_color_dictionnary
+from src.parsers import parser2025
+from src.parsers.parser2025 import PacketHeader, Packet
+from src.variables import *
+from src.packet_management import *
 
 
-class MainWindow(QWidget):
+# Thread qui lit un socket
+class SocketThread(QThread):
+    data_received = pyqtSignal(PacketHeader, Packet)
+
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Exemple avec QTabWidget + QTableWidget")
-        self.setGeometry(100, 100, 800, 600)
+        self.running = True
+        self.listener = parser2025.Listener(port=PORT[0],
+                        redirect=dictionnary_settings["redirect_active"],
+                        adress=dictionnary_settings["ip_adress"],
+                        redirect_port=int(dictionnary_settings["redirect_port"]))
 
-        main_layout = QVBoxLayout()
+    def run(self):
+        while self.running:
+            a = self.listener.get()
+            if a is not None:
+                self.data_received.emit(*a)
 
-        # Top horizontal layout
-        top_layout = QHBoxLayout()
-        btn1 = QPushButton("Bouton 1")
-        btn2 = QPushButton("Bouton 2")
-        top_layout.addWidget(btn1)
-        top_layout.addWidget(btn2)
-        main_layout.addLayout(top_layout)
+    def stop(self):
+        self.running = False
+        self.quit()
+        self.wait()
 
-        # Tabs
-        tabs = QTabWidget()
-        tabs.addTab(self.create_table_tab("Tableau 1"), "Onglet 1")
-        tabs.addTab(self.create_table_tab("Tableau 2"), "Onglet 2")
-        main_layout.addWidget(tabs)
+class MyTableModel(QAbstractTableModel):
+    def __init__(self, data, header):
+        super().__init__()
+        self._data = data  # liste de listes
+        self._header = header
 
-        self.setLayout(main_layout)
+    def rowCount(self, parent=QModelIndex()):
+        return len(self._data)
 
-    def create_table_tab(self, label):
-        table = QTableWidget(5, 3)
-        table.setHorizontalHeaderLabels(["Colonne A", "Colonne B", "Colonne C"])
-        for row in range(5):
-            for col in range(3):
-                item = QTableWidgetItem(f"{label} - {row},{col}")
-                table.setItem(row, col, item)
-        return table
+    def columnCount(self, parent=QModelIndex()):
+        return len(self._data[0]) if self._data else 0
+
+    def updateCell(self, row, column, value):
+        self._data[row][column] = value
+        index = self.index(row, column)
+        self.dataChanged.emit(index, index, [Qt.DisplayRole])
+
+    def data(self, index, role=Qt.DisplayRole):
+        if role == Qt.DisplayRole:
+            return self._data[index.row()][index.column()]
+        if role == Qt.ForegroundRole:
+            if index.column() == 2:
+                return QColor(tyres_color_dictionnary[self._data[index.row()][index.column()]])
+        if role == Qt.FontRole:
+            font = QFont()
+            if index.column() == 2:  # ← cellule spécifique
+                font.setBold(True)
+            return font
+
+    def setData(self, index, value, role=Qt.EditRole):
+        if role == Qt.EditRole:
+            self._data[index.row()][index.column()] = value
+            self.sort_data()
+            self.layoutChanged.emit()
+            return True
+        return False
+
+    def flags(self, index):
+        return Qt.ItemIsEnabled
+
+    def headerData(self, section, orientation, role):
+        if role == Qt.DisplayRole:
+            if orientation == Qt.Horizontal:
+                return self._header[section]
+        if role == Qt.FontRole:
+            font = QFont()
+            font.setBold(True)
+            return font
+
+    def update_data(self, new_data):
+        #self.beginResetModel()
+        self._data = new_data
+        self._data.sort(key=lambda row: int(row[0]))
+        #self.endResetModel()
 
 
-if __name__ == "__main__":
+class MainWindow(QMainWindow):
+    function_hashmap = {  # PacketId : (fonction, arguments)
+        0: (nothing, ()),  # PacketMotion
+        1: (nothing, ()),  # PacketSession
+        2: (update_lap_data, ()),  # PacketLapData
+        3: (warnings, ()),  # PacketEvent
+        4: (update_participants, ()),  # PacketParticipants
+        5: (update_car_setups, ()),  # PacketCarSetup
+        6: (update_car_telemetry, ()),  # PacketCarTelemetry
+        7: (update_car_status, ()),  # PacketCarStatus
+        8: (nothing, ()),  # PacketFinalClassification
+        9: (nothing, ()),  # PacketLobbyInfo
+        10: (update_car_damage, ()),  # PacketCarDamage
+        11: (nothing, ()),  # PacketSessionHistory
+        12: (nothing, ()),
+        13: (nothing, ()),
+        14: (nothing, ()),
+        15: (nothing, ())
+    }
+
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("TableView with Auto Sort")
+        self.resize(1080, 720)
+
+        self.socketThread = SocketThread()
+        self.socketThread.data_received.connect(self.update_table)
+        self.socketThread.start()
+
+        self.main_layout = QVBoxLayout()
+
+        self.tabs = QTabWidget()
+        self.create_title()
+        self.main_layout.addWidget(self.tabs)
+        self.models : dict[str, MyTableModel] = {}
+
+        self.create_tab(["Position", "Driver", "Tyres", "Tyres Age", "Gap (Leader)",
+                         "ERS %", "ERS Mode", "Warnings", "Race Number"], "Main")
+        self.create_tab(["Position", "Driver", "Tyres", "Tyres Wear", "Tyres Blister", "Front Wing Damage",
+                  "Rear Wing Damage", "Floor Damage", "Diffuser Damage", "Sidepod Damage", ""], "Damage")
+        self.create_tab(["Position", "Driver", "Tyres", "Current Lap", "Last Lap", "Fastest Lap"], "Laps")
+
+
+        container = QWidget()
+        container.setLayout(self.main_layout)
+        self.setCentralWidget(container)
+
+    def create_title(self):
+        h_layout = QHBoxLayout()
+        self.title_label = QLabel()
+
+        h_layout.addWidget(self.title_label)
+        self.main_layout.addLayout(h_layout)
+
+    def update_table(self, header, packet):
+        func, args = MainWindow.function_hashmap[header.m_packet_id]
+        func(packet, *args)
+        active_tab_name = self.tabs.tabText(self.tabs.currentIndex())
+        new_data = [player.tab_list(active_tab_name) for player in LISTE_JOUEURS if player.position != 0]
+        self.models[active_tab_name].update_data(new_data)
+
+    def create_tab(self, header, name):
+        data = [player.tab_list(name) for player in LISTE_JOUEURS if player.position != 0]
+
+        tab = QWidget(self)
+        layout = QVBoxLayout()
+        table = QTableView()
+        self.models[name] = MyTableModel(data=data,
+                              header=header)
+
+        table.setModel(self.models[name])
+        table.verticalHeader().setVisible(False)
+        layout.addWidget(table)
+        tab.setLayout(layout)
+        self.tabs.addTab(tab, name)
+
+
+if __name__ == '__main__':
     app = QApplication(sys.argv)
+    dark_stylesheet = """
+    QWidget {
+        background-color: #2b2b2b;
+        color: #f0f0f0;
+    }
+    QTabWidget::pane {
+        border: 1px solid #444;
+    }
+    QHeaderView::section {
+        background-color: #3c3c3c;
+        color: white;
+        padding: 4px;
+        border: 1px solid #444;
+    }
+    QTableView {
+        gridline-color: #555;
+        selection-background-color: #555;
+        selection-color: white;
+    }
+    QTabWidget::pane {
+    border: 1px solid #444;
+    background-color: #222;
+    }
+    
+    QTabBar::tab {
+        background: #333;
+        color: white;
+        padding: 6px;
+        border: 1px solid #555;
+        border-bottom: none;
+    }
+    
+    QTabBar::tab:selected {
+        background: #222;
+        color: white;
+        font-weight: bold;
+    }
+    
+    QTabBar::tab:hover {
+        background: #444;
+    }
+    """
+
+    app.setStyleSheet(dark_stylesheet)
+
     window = MainWindow()
     window.show()
-    sys.exit(app.exec())
+    sys.exit(app.exec_())

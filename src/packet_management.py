@@ -1,10 +1,5 @@
 import time
-from tkinter import Message, Button
 
-from pydantic.v1.typing import LITERAL_TYPES
-from ttkbootstrap import Toplevel, Entry, Label
-
-from Custom_Frame import Custom_Frame
 from dictionnaries import *
 from src.map_management import *
 
@@ -40,8 +35,6 @@ def update_session(packet, top_frame1, top_frame2, screen, map_canvas):  # Packe
     for i in range(session.nb_weatherForecastSamples):
         slot = packet.m_weather_forecast_samples[i]
         session.add_slot(slot)
-    update_title(top_frame1, top_frame2, screen)
-    update_frame6()
 
 def update_lap_data(packet):  # Packet 2
     mega_array = packet.m_lap_data
@@ -56,7 +49,7 @@ def update_lap_data(packet):  # Packet 2
         joueur.warnings = element.m_corner_cutting_warnings
         joueur.speed_trap = round(element.m_speedTrapFastestSpeed, 2)
         joueur.currentLapTime = element.m_current_lap_time_in_ms
-        joueur.delta_to_leader=element.m_deltaToCarInFrontMSPart
+        joueur.gap_to_leader=element.m_deltaToCarInFrontMSPart
         joueur.currentLapInvalid = element.m_current_lap_invalid
 
         if element.m_sector1_time_in_ms == 0 and joueur.currentSectors[0] != 0:  # On attaque un nouveau tour
@@ -64,11 +57,11 @@ def update_lap_data(packet):  # Packet 2
             joueur.lastLapSectors[2] = joueur.lastLapTime / 1_000 - joueur.lastLapSectors[0] - joueur.lastLapSectors[1]
 
         joueur.currentSectors = [element.m_sector1_time_in_ms / 1000, element.m_sector2_time_in_ms / 1000, 0]
-        if joueur.bestLapTime > element.m_last_lap_time_in_ms != 0 or joueur.bestLapTime == 0:
-            joueur.bestLapTime = element.m_last_lap_time_in_ms
+        if joueur.fastestLapTime > element.m_last_lap_time_in_ms != 0 or joueur.fastestLapTime == 0:
+            joueur.fastestLapTime = element.m_last_lap_time_in_ms
             joueur.bestLapSectors = joueur.lastLapSectors[:]
-        if joueur.bestLapTime < session.bestLapTime and element.m_last_lap_time_in_ms != 0 or joueur.bestLapTime == 0:
-            session.bestLapTime = joueur.bestLapTime
+        if joueur.fastestLapTime < session.fastestLapTime and element.m_last_lap_time_in_ms != 0 or joueur.fastestLapTime == 0:
+            session.fastestLapTime = joueur.fastestLapTime
             session.idxBestLapTime = index
         if element.m_car_position == 1:
             session.currentLap = mega_array[index].m_current_lap_num
@@ -89,7 +82,7 @@ def warnings(packet):  # Packet 3
             joueur.bestLapSectors = [0] * 3
             joueur.lastLapTime: float = 0
             joueur.currentSectors = [0] * 3
-            joueur.bestLapTime = 0
+            joueur.fastestLapTime = 0
     elif packet.m_event_string_code[2] == 82:
         LISTE_JOUEURS[packet.m_event_details.m_vehicle_idx].hasRetired = True
 
@@ -97,7 +90,7 @@ def update_participants(packet):  # Packet 4
     for index in range(22):
         element = packet.m_participants[index]
         joueur = LISTE_JOUEURS[index]
-        joueur.numero = element.m_race_number
+        joueur.raceNumber = element.m_race_number
         joueur.teamId = element.m_team_id
         joueur.aiControlled = element.m_ai_controlled
         joueur.yourTelemetry = element.m_your_telemetry
@@ -107,8 +100,7 @@ def update_participants(packet):  # Packet 4
             joueur.name = element.m_name
         session.nb_players = packet.m_num_active_cars
         if joueur.name in ['Pilote', 'Driver']: # More translations appreciated
-            joueur.name = teams_name_dictionary[joueur.teamId] + "#" + str(joueur.numero)
-    update_frame(LISTE_FRAMES, LISTE_JOUEURS, session)
+            joueur.name = teams_name_dictionary[joueur.teamId] + "#" + str(joueur.raceNumber)
 
 def update_car_setups(packet): # Packet 5
     array = packet.m_car_setups
@@ -126,7 +118,6 @@ def update_car_telemetry(packet):  # Packet 6
         if joueur.speed >= 200 and not joueur.S200_reached:
             print(f"{joueur.position} {joueur.name}  = {time.time() - session.startTime}")
             joueur.S200_reached = True
-    update_frame(LISTE_FRAMES, LISTE_JOUEURS, session)
 
 def update_car_status(packet):  # Packet 7
     for index in range(22):
@@ -139,7 +130,6 @@ def update_car_status(packet):  # Packet 7
             joueur.tyres = element.m_visual_tyre_compound
         joueur.ERS_mode = element.m_ers_deploy_mode
         joueur.ERS_pourcentage = round(element.m_ers_store_energy / 40_000)
-    update_frame(LISTE_FRAMES, LISTE_JOUEURS, session)
 
 def update_car_damage(packet):  # Packet 10
     for index in range(22):
@@ -153,59 +143,9 @@ def update_car_damage(packet):  # Packet 10
         joueur.floorDamage = element.m_floor_damage
         joueur.diffuserDamage = element.m_diffuser_damage
         joueur.sidepodDamage = element.m_sidepod_damage
-    update_frame(LISTE_FRAMES, LISTE_JOUEURS, session)
 
 def nothing(packet):# Packet 8, 9, 11, 12, 13
     pass
-
-
-
-def port_selection(dictionnary_settings, listener, PORT):
-    win = Toplevel()
-    win.grab_set()
-    win.wm_title("Port Selection")
-    Label(win, text="Receiving PORT :", font=("Arial", 16)).grid(row=0, column=0, sticky="we", padx=30)
-    e = Entry(win, font=("Arial", 16))
-    e.insert(0, dictionnary_settings["port"])
-    e.grid(row=1, column=0, padx=30)
-
-    def button():
-        PORT[0] = e.get()
-        if not PORT[0].isdigit() or not 1000 <= int(PORT[0]) <= 65536:
-            Message(win, text="The PORT must be an integer between 1000 and 65536", fg="red", font=("Arial", 16)).grid(
-                row=3, column=0)
-        else:
-            listener.socket.close()
-            listener.port = int(PORT[0])
-            listener.reset()
-            Label(win, text="").grid(row=3, column=0)
-            dictionnary_settings["port"] = str(PORT[0])
-            with open("../settings.txt", "w") as f:
-                json.dump(dictionnary_settings, f)
-            win.destroy()
-
-    win.bind('<Return>', lambda e: button())
-    win.bind('<KP_Enter>', lambda e: button())
-    b = Button(win, text="Confirm", font=("Arial", 16), command=button)
-    b.grid(row=2, column=0, pady=10)
-
-def update_title(top_label1, top_label2, screen):
-    top_label1.config(text=session.title_display())
-    top_label2.config(text=safetyCarStatusDict[session.safetyCarStatus])
-    if session.safetyCarStatus == 4:
-        top_label2.config(background="red")
-    elif session.safetyCarStatus !=0 or session.anyYellow:
-        top_label2.config(background="#FFD700")
-    else:
-        top_label2.config(background=screen.cget("background"))
-
-def update_frame(LISTE_FRAMES : list[Custom_Frame], LISTE_JOUEURS, session):
-    for i in range(5):
-        LISTE_FRAMES[i].update(LISTE_JOUEURS, session)
-
-def update_frame6():
-    LISTE_FRAMES[6].update(session)
-    
 
 
 

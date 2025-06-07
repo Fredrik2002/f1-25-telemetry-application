@@ -5,7 +5,7 @@ import src.Player as Player
 import json
 import sys
 
-with open("../settings.txt", "r") as f:
+with open("../../settings.txt", "r") as f:
     dictionnary_settings = json.load(f)
 
 if len(sys.argv)==2:
@@ -16,10 +16,6 @@ try: # No need to create the variables again
     PORT[0] = int(dictionnary_settings["port"])
 except NameError:  # If the variables were not created yet
     PORT = [int(dictionnary_settings["port"])]
-    listener = parser2025.Listener(port=PORT[0],
-                        redirect=dictionnary_settings["redirect_active"],
-                        adress=dictionnary_settings["ip_adress"],
-                        redirect_port=int(dictionnary_settings["redirect_port"]))
 
     LISTE_JOUEURS: list[Player] = [Player.Player() for _ in range(22)]
     session: Session = Session.Session()

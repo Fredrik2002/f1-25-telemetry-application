@@ -1,6 +1,13 @@
 import cProfile
 import re
 
+import sys
+import os
+
+sys.path.append(".")
+sys.path.append("..")
+sys.path.append("../src")
+
 from PyQt6.QtWidgets import QApplication
 
 from src.windows.main_window import MainWindow

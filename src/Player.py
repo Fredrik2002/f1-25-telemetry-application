@@ -1,5 +1,5 @@
-from dictionnaries import *
-from utils import conversion
+from src.dictionnaries import *
+from src.utils import conversion
 
 
 class Player:
@@ -13,7 +13,7 @@ class Player:
         self.ERS_pourcentage = 0
         self.fuelRemainingLaps = 0
         self.fuelMix = 0
-        self.numero = 0
+        self.raceNumber = 0
         self.teamId = -1
         self.pit: int = 0
         self.FrontLeftWingDamage = 0
@@ -29,7 +29,7 @@ class Player:
         self.worldPositionZ = 0
         self.penalties = 0
         self.driverStatus = 0
-        self.bestLapTime = 0
+        self.fastestLapTime = 0
         self.drs: int = 0
         self.yourTelemetry: int = 0
         self.speed: int = 0
@@ -48,23 +48,40 @@ class Player:
         self.aiControlled = -1
         self.hasRetired = False
         self.speed_trap = 0
-        self.delta_to_leader = 0
+        self.gap_to_leader = 0
         self.currentLapInvalid = 1
 
     def __str__(self):
         return self.name + str(self.position)
+
+    def tab_list(self, name):
+        if name == "Main":
+            return [self.position, self.name, tyres_dictionnary[self.tyres], self.tyresAgeLaps,
+                    self.gap_to_leader, self.ERS_pourcentage, ERS_dictionary[self.ERS_mode], self.warnings, self.raceNumber]
+        elif name == "Damage":
+            return [self.position, self.name, tyres_dictionnary[self.tyres], self.tyre_wear, self.tyre_blisters, self.FrontRightWingDamage,
+             self.rearWingDamage, self.floorDamage, self.diffuserDamage, self.sidepodDamage,
+             pit_dictionary[self.pit]]
+        elif name == "Laps":
+            return [self.position, self.name, tyres_dictionnary[self.tyres],
+                    f"{conversion(self.currentLapTime, 2)} [{', '.join('%.3f'%truc for truc in self.currentSectors)}",
+                    f"{conversion(self.lastLapTime, 2)} [{', '.join('%.3f'%truc for truc in self.lastLapSectors)}",
+                    f"{conversion(self.fastestLapTime, 2)} [{', '.join('%.3f' % truc for truc in self.bestLapSectors)}",
+                    ]
+        else:
+            raise ValueError(f"Unrecognized Tab Name : {name}")
 
     def printing(self, buttonId, liste_joueurs, session):
         if buttonId == 0:  # Menu principal
             if session in [5, 6, 7, 8, 9, 13]: # Qualif
                 return (
                     f"P{self.position}, {self.name} Lap :{conversion(self.currentLapTime, 2)} {ERS_dictionary[self.ERS_mode]},"
-                    f" num = {self.numero} Last lap : {conversion(self.lastLapTime, 2)}"
-                    f" Fastest lap : {conversion(self.bestLapTime, 2)} {pit_dictionary[self.pit]}")
+                    f" num = {self.raceNumber} Last lap : {conversion(self.lastLapTime, 2)}"
+                    f" Fastest lap : {conversion(self.fastestLapTime, 2)} {pit_dictionary[self.pit]}")
             else: #Course
                 return f"P{self.position}, {self.name} {self.tyresAgeLaps} tours " \
-                       f"Gap :{'%.3f'%(self.delta_to_leader/1000)} {self.ERS_pourcentage}% {ERS_dictionary[self.ERS_mode]} " \
-                       f"Warnings = {self.warnings} num = {self.numero} {pit_dictionary[self.pit]} {DRS_dict[self.drs]} "
+                       f"Gap :{'%.3f'%(self.gap_to_leader / 1000)} {self.ERS_pourcentage}% {ERS_dictionary[self.ERS_mode]} " \
+                       f"Warnings = {self.warnings} num = {self.raceNumber} {pit_dictionary[self.pit]} {DRS_dict[self.drs]} "
 
         elif buttonId == 1:  # Dégâts
             return (f"P{self.position}, {self.name} "
@@ -87,7 +104,7 @@ class Player:
             return f"P{self.position}, {self.name} "+ \
             f"Current lap : {conversion(self.currentLapTime, 2)} [{', '.join('%.3f'%truc for truc in self.currentSectors)}] " + \
             f"Last lap : {conversion(self.lastLapTime, 2)} [{', '.join('%.3f'%truc for truc in self.lastLapSectors)}]  " + \
-            f"Fastest lap : {conversion(self.bestLapTime, 2)} [{', '.join('%.3f'%truc for truc in self.bestLapSectors)}] "  + \
+            f"Fastest lap : {conversion(self.fastestLapTime, 2)} [{', '.join('%.3f' % truc for truc in self.bestLapSectors)}] "  + \
             f"{pit_dictionary[self.pit]}"
 
         elif buttonId == 4:
