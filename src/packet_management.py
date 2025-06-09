@@ -135,10 +135,10 @@ def update_car_damage(packet):  # Packet 10
     for index in range(22):
         element = packet.m_car_damage_data[index]
         joueur = PLAYERS_LIST[index]
-        joueur.tyre_wear = '[' + ', '.join('%.2f'%truc for truc in element.m_tyres_wear) + ']'
-        joueur.tyre_blisters = '[' + ', '.join(str(truc) for truc in element.m_tyre_blisters) + ']'
-        joueur.FrontLeftWingDamage = element.m_front_left_wing_damage
-        joueur.FrontRightWingDamage = element.m_front_right_wing_damage
+        joueur.tyre_wear = ['%.2f'%tyre for tyre in element.m_tyres_wear]
+        joueur.tyre_blisters = ['%.2f'%tyre for tyre in element.m_tyre_blisters]
+        joueur.frontLeftWingDamage = element.m_front_left_wing_damage
+        joueur.frontRightWingDamage = element.m_front_right_wing_damage
         joueur.rearWingDamage = element.m_rear_wing_damage
         joueur.floorDamage = element.m_floor_damage
         joueur.diffuserDamage = element.m_diffuser_damage

@@ -1,112 +1,39 @@
 import sys
 
+from PyQt5.QtCore import QSize
+
 sys.path.append(".")
 sys.path.append("..")
 sys.path.append("../src")
 
-from PyQt5.QtGui import QColor, QFont
+from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QTableView, QVBoxLayout, QWidget, QTabWidget, QHBoxLayout, QLabel
+    QApplication, QMainWindow, QTableView, QVBoxLayout, QWidget, QTabWidget, QHBoxLayout, QLabel, QAbstractItemView,
+    QTabBar
 )
-from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QThread, pyqtSignal
 
-from src.dictionnaries import tyres_color_dictionnary
-from src.parsers import parser2025
-from src.parsers.parser2025 import PacketHeader, Packet
-from src.variables import *
 from src.packet_management import *
+from src.windows.myTableModel import MyTableModel
+from src.windows.SocketThread import SocketThread
 
 
-# Thread qui lit un socket
-class SocketThread(QThread):
-    data_received = pyqtSignal(PacketHeader, Packet)
-
-    def __init__(self):
-        super().__init__()
-        self.running = True
-        self.listener = parser2025.Listener(port=PORT[0],
-                        redirect=dictionnary_settings["redirect_active"],
-                        adress=dictionnary_settings["ip_adress"],
-                        redirect_port=int(dictionnary_settings["redirect_port"]))
-
-    def run(self):
-        while self.running:
-            a = self.listener.get()
-            if a is not None:
-                self.data_received.emit(*a)
-
-    def stop(self):
-        self.running = False
-        self.quit()
-        self.wait()
-
-class MyTableModel(QAbstractTableModel):
-    def __init__(self, data, header):
-        super().__init__()
-        self._data = data  # liste de listes
-        self._header = header
-        self.header_dictionnary = {self._header[i]:i for i in range(len(self._header))}
-        self.sorted_players_list : list[Player] = sorted(PLAYERS_LIST)
-
-    def rowCount(self, parent=QModelIndex()):
-        return len(self._data)
-
-    def columnCount(self, parent=QModelIndex()):
-        return len(self._data[0]) if self._data else 0
-
-    def updateCell(self, row, column, value):
-        self._data[row][column] = value
-        index = self.index(row, column)
-        self.dataChanged.emit(index, index, [Qt.DisplayRole])
-
-    def data(self, index, role=Qt.DisplayRole):
-        if role == Qt.DisplayRole:
-            return self._data[index.row()][index.column()]
-        if role == Qt.ForegroundRole:
-            if index.column() == 2:  # Tyres column : they have their own color
-                return QColor(tyres_color_dictionnary[self._data[index.row()][index.column()]])
-            else:
-                return QColor(teams_color_dictionary[self.sorted_players_list[index.row()].teamId])
-        if role == Qt.FontRole:
-            font = QFont()
-            if index.column() == 2:  # ← cellule spécifique
-                font.setBold(True)
-            return font
-
-    def setData(self, index, value, role=Qt.EditRole):
-        if role == Qt.EditRole:
-            self._data[index.row()][index.column()] = value
-            self.sort_data()
-            self.layoutChanged.emit()
-            return True
-        return False
-
-    def flags(self, index):
-        return Qt.ItemIsEnabled
-
-    def headerData(self, section, orientation, role):
-        if role == Qt.DisplayRole:
-            if orientation == Qt.Horizontal:
-                return self._header[section]
-        if role == Qt.FontRole:
-            font = QFont()
-            font.setBold(True)
-            return font
-
-    def update_data(self, sorted_players_list, active_tab_name):
-        """
-        sorted_players_list (list : Player) : List of Player sorted by position
-        active_tab_name (str) : Gives the name of the current tab
-        """
-        self.sorted_players_list = sorted_players_list
-        self._data = [player.tab_list(active_tab_name) for player in sorted_players_list if player.position != 0]
-        self.layoutChanged.emit()
-
+class FixedSizeTabBar(QTabBar):
+    def tabSizeHint(self, index):
+        # Exemple : taille différente selon l'index
+        default_size = super().tabSizeHint(index)
+        custom_widths = {
+            0: 100,
+            1: 120,
+            2: 100,
+            3: 180
+        }
+        width = custom_widths.get(index, default_size.width())
+        return QSize(width, default_size.height())
 
 class MainWindow(QMainWindow):
     function_hashmap = {  # PacketId : (fonction, arguments)
-        0: (nothing, ()),  # PacketMotion
-        1: (nothing, ()),  # PacketSession
+        0: (update_motion, ()),  # PacketMotion
+        1: (update_session, ()),  # PacketSession
         2: (update_lap_data, ()),  # PacketLapData
         3: (warnings, ()),  # PacketEvent
         4: (update_participants, ()),  # PacketParticipants
@@ -126,7 +53,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("TableView with Auto Sort")
-        self.resize(1080, 720)
+        self.resize(1440, 800)
 
         self.socketThread = SocketThread()
         self.socketThread.data_received.connect(self.update_table)
@@ -135,24 +62,44 @@ class MainWindow(QMainWindow):
         self.main_layout = QVBoxLayout()
 
         self.tabs = QTabWidget()
+        self.tabs.currentChanged.connect(self.tabChanged)
+        self.tabs.setTabBar(FixedSizeTabBar())
         self.create_title()
+
         self.main_layout.addWidget(self.tabs)
         self.models : dict[str, MyTableModel] = {}
+        self.tables : dict[str, QTableView] = {}
 
-        self.create_tab(["Position", "Driver", "Tyres", "Tyres Age", "Gap (Leader)",
-                         "ERS %", "ERS Mode", "Warnings", "Race Number"], "Main")
-        self.create_tab(["Position", "Driver", "Tyres", "Tyres Wear", "Tyres Blister", "Front Wing Damage",
-                  "Rear Wing Damage", "Floor Damage", "Diffuser Damage", "Sidepod Damage", ""], "Damage")
+        self.create_tab(["Position", "Driver", "Tyres", "Tyres\nAge", "Gap\n(Leader)",
+                         "ERS", "ERS Mode", "Warnings", "Race\nNumber", "PIT"], "Main")
+        self.create_tab(["Position", "Driver", "Tyres", "Tyres\nWear",
+                         "Tyres\nBlister", "Front Wing\nDamage",
+                  "Rear Wing\nDamage", "Floor\nDamage", "Diffuser\nDamage", "Sidepod\nDamage"], "Damage")
         self.create_tab(["Position", "Driver", "Tyres", "Current Lap", "Last Lap", "Fastest Lap"], "Laps")
+        self.create_tab(["Position", "Driver", "Tyres", "Tyres Surface\nTemperatures",
+                         "Tyres Inner\nTemperatures"], "Temperatures")
 
 
+        self.setup_table_columns()
         container = QWidget()
         container.setLayout(self.main_layout)
         self.setCentralWidget(container)
 
+    def tabChanged(self):
+        self.setup_table_columns()
+
+    def setup_table_columns(self):
+        for name, table in self.tables.items():
+            width = table.viewport().width()
+            for i in range(self.models[name].columnCount()):
+                table.setColumnWidth(i, int(width/100*COLUMN_SIZE_DICTIONARY[name][i]))
+
     def create_title(self):
         h_layout = QHBoxLayout()
         self.title_label = QLabel()
+        font = QFont()
+        font.setWeight(18)
+        self.title_label.setFont(font)
 
         h_layout.addWidget(self.title_label)
         self.main_layout.addLayout(h_layout)
@@ -161,8 +108,11 @@ class MainWindow(QMainWindow):
         func, args = MainWindow.function_hashmap[header.m_packet_id]
         func(packet, *args)
         active_tab_name = self.tabs.tabText(self.tabs.currentIndex())
-        SORTED_PLAYERS_LIST = sorted(PLAYERS_LIST)
-        self.models[active_tab_name].update_data(SORTED_PLAYERS_LIST, active_tab_name)
+        sorted_players_list = sorted(PLAYERS_LIST)
+        self.models[active_tab_name].update_data(sorted_players_list, active_tab_name)
+
+        if header.m_packet_id == 1:
+            self.title_label.setText(session.title_display())
 
     def create_tab(self, header, name):
         data = [player.tab_list(name) for player in PLAYERS_LIST if player.position != 0]
@@ -170,6 +120,8 @@ class MainWindow(QMainWindow):
         tab = QWidget(self)
         layout = QVBoxLayout()
         table = QTableView()
+        table.setWordWrap(True)
+        self.tables[name] = table
         self.models[name] = MyTableModel(data=data,
                               header=header)
 
@@ -178,6 +130,13 @@ class MainWindow(QMainWindow):
         layout.addWidget(table)
         tab.setLayout(layout)
         self.tabs.addTab(tab, name)
+        table.resizeRowsToContents()
+        table.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
+        table.setHorizontalScrollMode(QAbstractItemView.ScrollPerPixel)
+
+    def resizeEvent(self, event):
+        self.setup_table_columns()
+        super().resizeEvent(event)
 
 
 if __name__ == '__main__':
@@ -195,6 +154,8 @@ if __name__ == '__main__':
         color: white;
         padding: 4px;
         border: 1px solid #444;
+        font-size: 12pt;
+        font-weight: bold
     }
     QTableView {
         gridline-color: #555;
@@ -207,21 +168,29 @@ if __name__ == '__main__':
     }
     
     QTabBar::tab {
+        height: 40px;
         background: #333;
         color: white;
         padding: 6px;
         border: 1px solid #555;
         border-bottom: none;
+        font-size: 14pt;
     }
     
     QTabBar::tab:selected {
         background: #222;
         color: white;
         font-weight: bold;
+        font-size: 14pt;
     }
     
     QTabBar::tab:hover {
         background: #444;
+        font-size: 14pt;
+    }
+    
+    QLabel{
+        font-size: 18pt;
     }
     """
 

@@ -6,9 +6,9 @@ from src.utils import conversion
 
 class Player:
     def __init__(self):
-        self.position: int = 0
-        self.tyre_wear = []
-        self.tyre_blisters = []
+        self.position: int = 1
+        self.tyre_wear = ["0.00", "0.00", "0.00", "0.00"]
+        self.tyre_blisters = [0,0,0,0]
         self.tyres = 0
         self.warnings = 0
         self.ERS_mode = -1
@@ -18,8 +18,8 @@ class Player:
         self.raceNumber = 0
         self.teamId = -1
         self.pit: int = 0
-        self.FrontLeftWingDamage = 0
-        self.FrontRightWingDamage = 0
+        self.frontLeftWingDamage = 0
+        self.frontRightWingDamage = 0
         self.tyres_temp_inner = [0, 0, 0, 0]
         self.tyres_temp_surface = [0, 0, 0, 0]
         self.tyresAgeLaps = 0
@@ -64,20 +64,30 @@ class Player:
         except AttributeError:
             raise AttributeError("Cannot compare Player with a non-Player object")
 
+    def show_tyres_list(self, tyres_list):
+        return f"{tyres_list[2]} {tyres_list[3]} \n{tyres_list[0]} {tyres_list[1]}"
+
+    def show_front_wing_damage(self):
+        return f"{self.frontLeftWingDamage}-{self.frontRightWingDamage}"
+
     def tab_list(self, name):
         if name == "Main":
             return [self.position, self.name, tyres_dictionnary[self.tyres], self.tyresAgeLaps,
-                    self.gap_to_leader, self.ERS_pourcentage, ERS_dictionary[self.ERS_mode], self.warnings, self.raceNumber]
+                    self.gap_to_leader, str(self.ERS_pourcentage)+'%', ERS_dictionary[self.ERS_mode], self.warnings,
+                    self.raceNumber, pit_dictionary[self.pit]]
         elif name == "Damage":
-            return [self.position, self.name, tyres_dictionnary[self.tyres], self.tyre_wear, self.tyre_blisters, self.FrontRightWingDamage,
-             self.rearWingDamage, self.floorDamage, self.diffuserDamage, self.sidepodDamage,
-             pit_dictionary[self.pit]]
+            return [self.position, self.name, tyres_dictionnary[self.tyres], self.show_tyres_list(self.tyre_wear),
+                    self.show_tyres_list(self.tyre_blisters), self.show_front_wing_damage(),
+             self.rearWingDamage, self.floorDamage, self.diffuserDamage, self.sidepodDamage]
         elif name == "Laps":
             return [self.position, self.name, tyres_dictionnary[self.tyres],
                     f"{conversion(self.currentLapTime, 2)} [{', '.join('%.3f'%truc for truc in self.currentSectors)}",
                     f"{conversion(self.lastLapTime, 2)} [{', '.join('%.3f'%truc for truc in self.lastLapSectors)}",
                     f"{conversion(self.fastestLapTime, 2)} [{', '.join('%.3f' % truc for truc in self.bestLapSectors)}",
                     ]
+        elif name == "Temperatures":
+            return [self.position, self.name, tyres_dictionnary[self.tyres],
+            self.show_tyres_list(self.tyres_temp_surface), self.show_tyres_list(self.tyres_temp_inner)]
         else:
             raise ValueError(f"Unrecognized Tab Name : {name}")
 
@@ -95,8 +105,8 @@ class Player:
 
         elif buttonId == 1:  # Dégâts
             return (f"P{self.position}, {self.name} "
-                    f"usure = {self.tyre_wear}, blisters = {self.tyre_blisters}, FW = [{self.FrontLeftWingDamage},  "
-                    f"{self.FrontRightWingDamage}] | "
+                    f"usure = {self.tyre_wear}, blisters = {self.tyre_blisters}, FW = [{self.frontLeftWingDamage},  "
+                    f"{self.frontRightWingDamage}] | "
                     f"RW ={self.rearWingDamage} | "
                     f"floor = {self.floorDamage} | "
                     f"diffuser = {self.diffuserDamage} | "
