@@ -1,3 +1,5 @@
+import math
+
 from src.dictionnaries import *
 from src.utils import conversion
 
@@ -53,6 +55,14 @@ class Player:
 
     def __str__(self):
         return self.name + str(self.position)
+
+    def __lt__(self, other):  # For sorting players by positions
+        if self.position == 0:  # We want this player at the bottom of our table (not displayed)
+            return False
+        try:
+            return self.position < other.position
+        except AttributeError:
+            raise AttributeError("Cannot compare Player with a non-Player object")
 
     def tab_list(self, name):
         if name == "Main":

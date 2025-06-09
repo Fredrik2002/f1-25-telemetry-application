@@ -45,6 +45,8 @@ class MyTableModel(QAbstractTableModel):
         super().__init__()
         self._data = data  # liste de listes
         self._header = header
+        self.header_dictionnary = {self._header[i]:i for i in range(len(self._header))}
+        self.sorted_players_list : list[Player] = sorted(PLAYERS_LIST)
 
     def rowCount(self, parent=QModelIndex()):
         return len(self._data)
@@ -61,8 +63,10 @@ class MyTableModel(QAbstractTableModel):
         if role == Qt.DisplayRole:
             return self._data[index.row()][index.column()]
         if role == Qt.ForegroundRole:
-            if index.column() == 2:
+            if index.column() == 2:  # Tyres column : they have their own color
                 return QColor(tyres_color_dictionnary[self._data[index.row()][index.column()]])
+            else:
+                return QColor(teams_color_dictionary[self.sorted_players_list[index.row()].teamId])
         if role == Qt.FontRole:
             font = QFont()
             if index.column() == 2:  # ← cellule spécifique
@@ -89,11 +93,14 @@ class MyTableModel(QAbstractTableModel):
             font.setBold(True)
             return font
 
-    def update_data(self, new_data):
-        #self.beginResetModel()
-        self._data = new_data
-        self._data.sort(key=lambda row: int(row[0]))
-        #self.endResetModel()
+    def update_data(self, sorted_players_list, active_tab_name):
+        """
+        sorted_players_list (list : Player) : List of Player sorted by position
+        active_tab_name (str) : Gives the name of the current tab
+        """
+        self.sorted_players_list = sorted_players_list
+        self._data = [player.tab_list(active_tab_name) for player in sorted_players_list if player.position != 0]
+        self.layoutChanged.emit()
 
 
 class MainWindow(QMainWindow):
@@ -154,11 +161,11 @@ class MainWindow(QMainWindow):
         func, args = MainWindow.function_hashmap[header.m_packet_id]
         func(packet, *args)
         active_tab_name = self.tabs.tabText(self.tabs.currentIndex())
-        new_data = [player.tab_list(active_tab_name) for player in LISTE_JOUEURS if player.position != 0]
-        self.models[active_tab_name].update_data(new_data)
+        SORTED_PLAYERS_LIST = sorted(PLAYERS_LIST)
+        self.models[active_tab_name].update_data(SORTED_PLAYERS_LIST, active_tab_name)
 
     def create_tab(self, header, name):
-        data = [player.tab_list(name) for player in LISTE_JOUEURS if player.position != 0]
+        data = [player.tab_list(name) for player in PLAYERS_LIST if player.position != 0]
 
         tab = QWidget(self)
         layout = QVBoxLayout()

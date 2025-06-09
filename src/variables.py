@@ -17,10 +17,10 @@ try: # No need to create the variables again
 except NameError:  # If the variables were not created yet
     PORT = [int(dictionnary_settings["port"])]
 
-    LISTE_JOUEURS: list[Player] = [Player.Player() for _ in range(22)]
+    PLAYERS_LIST: list[Player] = [Player.Player() for _ in range(22)]
     session: Session = Session.Session()
     created_map = False
     WIDTH_POINTS = 6
-    LISTE_FRAMES = []
     button_list: list = ["Main Menu", "Damage", "Temperatures", "Laps", "Map", "ERS & Fuel", "Weather Forecast",
                                   "Packet Reception"]
+    POSITION_CHANGED = False
