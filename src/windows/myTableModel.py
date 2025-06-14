@@ -37,6 +37,11 @@ class MyTableModel(QAbstractTableModel):
             if index.column() == 2:  # ← cellule spécifique
                 font.setBold(True)
             return font
+        if role == Qt.TextAlignmentRole:
+            if index.column() == 0:
+                return Qt.AlignRight | Qt.AlignVCenter
+            elif any(column in self._header[index.column()] for column in ["Temperatures", "Tyres"]):
+                return Qt.AlignCenter
 
     def setData(self, index, value, role=Qt.EditRole):
         if role == Qt.EditRole:

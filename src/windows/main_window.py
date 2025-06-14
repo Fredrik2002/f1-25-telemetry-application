@@ -60,6 +60,7 @@ class MainWindow(QMainWindow):
         self.socketThread.start()
 
         self.main_layout = QVBoxLayout()
+        self.map_canvas = None
 
         self.tabs = QTabWidget()
         self.tabs.currentChanged.connect(self.tabChanged)
@@ -139,20 +140,22 @@ class MainWindow(QMainWindow):
         tab = QWidget()
         layout = QVBoxLayout()
 
-        canvas = Canvas()
-        self.models["Map"] = canvas
-        layout.addWidget(canvas)
+        self.map_canvas = Canvas()
+        self.models["Map"] = self.map_canvas
+        layout.addWidget(self.map_canvas)
         tab.setLayout(layout)
         self.tabs.addTab(tab, "Map")
 
     def resizeEvent(self, event):
         self.setup_table_columns()
+        self.map_canvas.redraw_map = True
         super().resizeEvent(event)
 
 
 class Canvas(QWidget):
     PADDING = 30
     RADIUS = 3
+    FONT = QFont("Arial", 12)
 
     def __init__(self):
         super().__init__()
@@ -166,9 +169,8 @@ class Canvas(QWidget):
 
     def paintEvent(self, event):
         painter = QPainter(self)
-        painter.drawLine(10, 10, 100, 100)
+        painter.setFont(Canvas.FONT)
         if self.redraw_map:
-            print("Create")
             self.create_map(painter)
             self.draw_circles(painter)
             self.redraw_map = False
@@ -176,9 +178,11 @@ class Canvas(QWidget):
             for polygon in session.segments:
                 painter.drawPolyline(polygon)
             for player in PLAYERS_LIST:
-                player.oval.moveTo(player.worldPositionX / self.coeff + self.offset_x - Canvas.RADIUS,
-                                      player.worldPositionZ / self.coeff + self.offset_z - Canvas.RADIUS)
+                x_map = int(player.worldPositionX / self.coeff + self.offset_x - Canvas.RADIUS)
+                z_map = int(player.worldPositionZ / self.coeff + self.offset_z - Canvas.RADIUS)
+                player.oval.moveTo(x_map, z_map)
                 painter.setPen(player.qpen)
+                painter.drawText(x_map+20, z_map+20, player.name)
                 painter.drawEllipse(player.oval)
 
 
@@ -187,6 +191,7 @@ class Canvas(QWidget):
 
 
     def create_map(self, painter):
+        session.segments.clear()
         cmi = 1
         L0, L1, = [], []
         L = [[]]
