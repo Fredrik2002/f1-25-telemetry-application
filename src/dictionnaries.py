@@ -1,3 +1,5 @@
+from PyQt5.QtGui import QColor
+
 
 def rgbtohex(r,g,b):
     return f'#{r:02x}{g:02x}{b:02x}'
@@ -78,20 +80,20 @@ track_dictionary = { #(track name, highNumber=Small on canvas, x_offset, y_offse
 }
 
 teams_color_dictionary = {
-    -1: "#FFFFFF",
-    0: "#00C7CD",
-    1: "#FF0000",
-    2: "#0000FF",
-    3: "#5097FF",
-    4: "#00902A",
-    5: "#009BFF",
-    6: "#00446F",
-    7: "#95ACBB",
-    8: "#FFAE00",
-    9: "#980404",
-    41:"#000000",
-    104: "#670498",
-    255: "#670498"
+    -1: QColor("#FFFFFF"),
+    0: QColor("#00C7CD"),
+    1: QColor("#FF0000"),
+    2: QColor("#0000FF"),
+    3: QColor("#5097FF"),
+    4: QColor("#00902A"),
+    5: QColor("#009BFF"),
+    6: QColor("#00446F"),
+    7: QColor("#95ACBB"),
+    8: QColor("#FFAE00"),
+    9: QColor("#980404"),
+    41:QColor("#000000"),
+    104: QColor("#670498"),
+    255: QColor("#670498")
 }
 
 teams_name_dictionary = {

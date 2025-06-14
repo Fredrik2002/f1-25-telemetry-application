@@ -1,6 +1,6 @@
 import time
 
-from dictionnaries import *
+from src.dictionnaries import *
 from src.map_management import *
 
 

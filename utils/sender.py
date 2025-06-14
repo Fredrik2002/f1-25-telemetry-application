@@ -8,7 +8,7 @@ PORT = 20777
 if len(sys.argv)>1:
     PORT = int(sys.argv[1])
 
-with open('E:/Data_samples/F1 25/2025-06-01 17-47-20', 'rb') as file:
+with open('../2025-06-01 17-47-20', 'rb') as file:
     b = pickle.load(file)
 i=200_000
 

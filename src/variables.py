@@ -30,5 +30,5 @@ except NameError:  # If the variables were not created yet
         "Main": [8, 15, 8, 8, 10, 5, 10, 10, 10, 5],
         "Damage": [8, 15, 8, 15, 15, 12, 12, 10, 10, 10],
         "Laps": [8, 15, 8, 25, 25, 25],
-        "Temperatures": [8, 15, 8, 15, 15]
+        "Temperatures": [8, 15, 8, 12, 12]
     }

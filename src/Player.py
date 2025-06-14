@@ -1,5 +1,8 @@
 import math
 
+from PyQt5.QtCore import QRectF
+from PyQt5.QtGui import QPen
+
 from src.dictionnaries import *
 from src.utils import conversion
 
@@ -43,7 +46,8 @@ class Player:
         self.S200_reached = True
         self.currentLapTime = 0
         self.setup_array = []
-        self.oval = None
+        self.oval : QRectF = None
+        self.qpen : QPen = None
         self.Xmove = 0
         self.Zmove = 0
         self.etiquette = ""
@@ -81,9 +85,9 @@ class Player:
              self.rearWingDamage, self.floorDamage, self.diffuserDamage, self.sidepodDamage]
         elif name == "Laps":
             return [self.position, self.name, tyres_dictionnary[self.tyres],
-                    f"{conversion(self.currentLapTime, 2)} [{', '.join('%.3f'%truc for truc in self.currentSectors)}",
-                    f"{conversion(self.lastLapTime, 2)} [{', '.join('%.3f'%truc for truc in self.lastLapSectors)}",
-                    f"{conversion(self.fastestLapTime, 2)} [{', '.join('%.3f' % truc for truc in self.bestLapSectors)}",
+                    f"{conversion(self.currentLapTime, 2)} [{', '.join('%.3f'%truc for truc in self.currentSectors)}]",
+                    f"{conversion(self.lastLapTime, 2)} [{', '.join('%.3f'%truc for truc in self.lastLapSectors)}]",
+                    f"{conversion(self.fastestLapTime, 2)} [{', '.join('%.3f' % truc for truc in self.bestLapSectors)}]",
                     ]
         elif name == "Temperatures":
             return [self.position, self.name, tyres_dictionnary[self.tyres],
