@@ -1,6 +1,6 @@
 import sys
 
-from PyQt5.QtCore import QSize, Qt, QPointF, QRectF
+from PyQt5.QtCore import QSize, Qt, QPointF, QRectF, QAbstractTableModel
 
 sys.path.append(".")
 sys.path.append("..")
@@ -13,7 +13,7 @@ from PyQt5.QtWidgets import (
 )
 
 from src.packet_management import *
-from src.windows.myTableModel import MyTableModel
+from src.windows.myTableModel import MyTableModel, MyTableModelWeatherForecast
 from src.windows.SocketThread import SocketThread
 
 
@@ -24,8 +24,10 @@ class FixedSizeTabBar(QTabBar):
             0: 100,
             1: 120,
             2: 100,
-            3: 180,
-            4: 80
+            3: 190,
+            4: 150,
+            5: 80,
+            6: 230
         }
         width = custom_widths.get(index, default_size.width())
         return QSize(width, default_size.height())
@@ -61,6 +63,7 @@ class MainWindow(QMainWindow):
 
         self.main_layout = QVBoxLayout()
         self.map_canvas = None
+        self.weather_table = None
 
         self.tabs = QTabWidget()
         self.tabs.currentChanged.connect(self.tabChanged)
@@ -68,7 +71,7 @@ class MainWindow(QMainWindow):
         self.create_title()
 
         self.main_layout.addWidget(self.tabs)
-        self.models : dict[str, MyTableModel] = {}
+        self.models : dict[str, QAbstractTableModel] = {}
         self.tables : dict[str, QTableView] = {}
 
         self.create_tab(["Position", "Driver", "Tyres", "Tyres\nAge", "Gap\n(Leader)",
@@ -79,7 +82,10 @@ class MainWindow(QMainWindow):
         self.create_tab(["Position", "Driver", "Tyres", "Current Lap", "Last Lap", "Fastest Lap"], "Laps")
         self.create_tab(["Position", "Driver", "Tyres", "Tyres Surface\nTemperatures",
                          "Tyres Inner\nTemperatures"], "Temperatures")
+        self.create_tab(["Position", "Driver", "Tyres", "ERS", "ERS Mode", "Fuel", "Fuel Mix"],
+                        "ERS && Fuel")
         self.create_map_tab()
+        self.create_weather_tab()
 
 
         container = QWidget()
@@ -146,6 +152,23 @@ class MainWindow(QMainWindow):
         tab.setLayout(layout)
         self.tabs.addTab(tab, "Map")
 
+    def create_weather_tab(self):
+        tab = QWidget(self)
+        layout = QVBoxLayout()
+        table = QTableView()
+        table.setWordWrap(True)
+        self.tables["Weather Forecast"] = table
+        self.models["Weather Forecast"] = MyTableModelWeatherForecast()
+
+        table.setModel(self.models["Weather Forecast"])
+        table.verticalHeader().setVisible(False)
+        layout.addWidget(table)
+        tab.setLayout(layout)
+        self.tabs.addTab(tab, "Weather Forecast")
+        table.resizeRowsToContents()
+        table.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
+        table.setHorizontalScrollMode(QAbstractItemView.ScrollPerPixel)
+
     def resizeEvent(self, event):
         self.setup_table_columns()
         self.map_canvas.redraw_map = True
@@ -159,8 +182,6 @@ class Canvas(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.redraw_map = True
-
         # Those values are automatically calculated in the create_map function according to the canvas size
         self.coeff = None
         self.offset_x = None
@@ -168,14 +189,16 @@ class Canvas(QWidget):
 
 
     def paintEvent(self, event):
+        global REDRAW_MAP
         painter = QPainter(self)
         painter.setFont(Canvas.FONT)
-        if self.redraw_map:
+        if REDRAW_MAP:
             self.create_map(painter)
             self.draw_circles(painter)
-            self.redraw_map = False
+            REDRAW_MAP = False
         else:
-            for polygon in session.segments:
+            for index, polygon in enumerate(session.segments):
+                painter.setPen(QPen(color_flag_dict[session.marshalZones[index].m_zone_flag]))
                 painter.drawPolyline(polygon)
             for player in PLAYERS_LIST:
                 x_map = int(player.worldPositionX / self.coeff + self.offset_x - Canvas.RADIUS)
@@ -234,10 +257,12 @@ class Canvas(QWidget):
         self.offset_z = -z_min/self.coeff + (canvas_height - (z_max-z_min)/self.coeff)/2 + Canvas.PADDING
 
         # We create a polygon for each minisector
-        for zone in L:
+        for index, zone in enumerate(L):
             points = [QPointF(x / self.coeff + self.offset_x, z / self.coeff + self.offset_z) for x, z in zone]
             polygon = QPolygonF(points)
+            painter.setPen(QPen(color_flag_dict[session.marshalZones[index].m_zone_flag]))
             session.segments.append(polygon)
+            painter.setPen(QPen(Qt.red))
             painter.drawPolyline(polygon)
 
     def draw_circles(self, painter):

@@ -1,22 +1,6 @@
 from src.dictionnaries import session_dictionary, track_dictionary, weather_dictionary, color_flag_dict
+from src.parsers.parser2025 import WeatherForecastSample
 from src.utils import conversion
-
-class WeatherForecastSample:
-    def __init__(self, time, weather, tktp, airtp, rainP):
-        self.time = time
-        self.weather = weather
-        self.trackTemp = tktp
-        self.airTemp = airtp
-        self.rainPercentage = rainP
-        self.weatherForecastAccuracy = -1
-
-    def __repr__(self):
-        return f"{self.time}m : {weather_dictionary[self.weather]}, Track : {self.trackTemp}°C, " \
-               f"Air : {self.airTemp}°C, Humidity : {self.rainPercentage}% "
-
-    def __str__(self):
-        return f"{self.time}m : {weather_dictionary[self.weather]}, Track : {self.trackTemp}°C, " \
-               f"Air : {self.airTemp}°C, Humidity : {self.rainPercentage}% "
 
 class Session:
     def __init__(self):
@@ -25,7 +9,7 @@ class Session:
         self.nbLaps = 0
         self.currentLap = 0
         self.tour_precedent = 0
-        self.Seance = 0
+        self.Session = 0
         self.Finished = False
         self.time_left = 0
         self.legende = ""
@@ -47,20 +31,42 @@ class Session:
         self.packet_received = [0]*14
         self.anyYellow = False
 
-    def add_slot(self, slot):
-        self.weatherList.append(WeatherForecastSample(slot.m_time_offset, slot.m_weather, slot.m_track_temperature,
-                                                      slot.m_air_temperature, slot.m_rain_percentage))
+    def show_weather_sample(self, i):
+        if self.weatherList[i].m_air_temperature_change == 0:
+            emoji_air = "🔼"
+        elif self.weatherList[i].m_air_temperature_change == 1:
+            emoji_air = "🔽"
+        elif self.weatherList[i].m_air_temperature_change == 2:
+            emoji_air = "▶️"
+        else:
+            emoji_air = ""
+
+        if self.weatherList[i].m_track_temperature_change == 0:
+            emoji_track = "🔼"
+        elif self.weatherList[i].m_track_temperature_change == 1:
+            emoji_track = "🔽"
+        elif self.weatherList[i].m_track_temperature_change == 2:
+            emoji_track = "▶️"
+        else:
+            emoji_track = ""
+
+        return [session_dictionary[self.weatherList[i].m_session_type],
+         "+" + str(self.weatherList[i].m_time_offset) + "min",
+         str(self.weatherList[i].m_rain_percentage) + "%",
+         weather_dictionary[self.weatherList[i].m_weather],
+         emoji_air + str(self.weatherList[i].m_air_temperature) + "°C",
+         emoji_track + str(self.weatherList[i].m_track_temperature) + "°C"]
 
     def clear_slot(self):
         self.weatherList = []
 
     def title_display(self):
-        if self.Seance == 18:
+        if self.Session == 18:
             string = f"Time Trial : {track_dictionary[self.track][0]}"
-        elif self.Seance in [15,16,17]:
-            string = f"Session : {session_dictionary[self.Seance]}, Lap : {self.currentLap}/{self.nbLaps}, " \
+        elif self.Session in [15, 16, 17]:
+            string = f"Session : {session_dictionary[self.Session]}, Lap : {self.currentLap}/{self.nbLaps}, " \
                         f"Air : {self.airTemperature}°C / Track : {self.trackTemperature}°C"
-        elif self.Seance in [5,6,7,8,9]:
+        elif self.Session in [5, 6, 7, 8, 9]:
             string = f" Qualy : {conversion(self.time_left, 1)}"
         else:
             string = f" FP : {conversion(self.time_left, 1)}"

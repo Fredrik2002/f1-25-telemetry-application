@@ -12,15 +12,15 @@ def valid_ip_address(adress):
             drapeau = False
     return drapeau
 
-black = "#000000"
-white = "#FFFFFF"
-green = "#00FF00"
-blue = "#0000FF"
-yellow = "#FFD700"
-red = "#FF0000"
-purple = "#880088"
-gold = "#FFD700"
-grey = "#4B4B4B"
+black = QColor("#000000")
+white = QColor("#FFFFFF")
+green = QColor("#00FF00")
+blue = QColor("#0000FF")
+yellow = QColor("#FFD700")
+red = QColor("#FF0000")
+purple = QColor("#880088")
+gold = QColor("#FFD700")
+grey = QColor("#4B4B4B")
 
 
 tyres_dictionnary = {
@@ -112,12 +112,12 @@ teams_name_dictionary = {
 }
 
 weather_dictionary = {
-    0: "Clear",
-    1: "Light Cloud",
-    2: "Overcast",
-    3: "Light Rain",
-    4: "Heavy Rain",
-    5: "Storm"
+    0: "☀️ Clear",
+    1: "🌥️ Light Cloud",
+    2: "☁️ Overcast",
+    3: "🌦️ Light Rain",
+    4: "🌧️ Heavy Rain",
+    5: "⛈️ Storm"
 }
 
 fuel_dict = {

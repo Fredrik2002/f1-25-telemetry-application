@@ -3,6 +3,7 @@ import math
 from PyQt5.QtCore import QRectF
 from PyQt5.QtGui import QPen
 
+import src.variables
 from src.dictionnaries import *
 from src.utils import conversion
 
@@ -74,6 +75,12 @@ class Player:
     def show_front_wing_damage(self):
         return f"{self.frontLeftWingDamage}-{self.frontRightWingDamage}"
 
+    def show_fuel(self):
+        if src.variables.session.Session in [15, 16, 17]:
+            if self.fuelRemainingLaps > 0:
+                return "+" + '%.2f'% self.fuelRemainingLaps + " Laps"
+        return '%.2f'% self.fuelRemainingLaps + " Laps"
+
     def tab_list(self, name):
         if name == "Main":
             return [self.position, self.name, tyres_dictionnary[self.tyres], self.tyresAgeLaps,
@@ -92,6 +99,9 @@ class Player:
         elif name == "Temperatures":
             return [self.position, self.name, tyres_dictionnary[self.tyres],
             self.show_tyres_list(self.tyres_temp_surface), self.show_tyres_list(self.tyres_temp_inner)]
+        elif name == "ERS && Fuel":
+            return [self.position, self.name, tyres_dictionnary[self.tyres], str(self.ERS_pourcentage)+'%',
+                    ERS_dictionary[self.ERS_mode], self.show_fuel(), fuel_dict[self.fuelMix]]
         else:
             raise ValueError(f"Unrecognized Tab Name : {name}")
 

@@ -32,8 +32,7 @@ class MyTableModel(QAbstractTableModel):
             else:
                 return QColor(teams_color_dictionary[self.sorted_players_list[index.row()].teamId])
         if role == Qt.FontRole:
-            font = QFont()
-            font.setPointSize(12)
+            font = QFont("Segoe UI Emoji", 12)
             if index.column() == 2:  # ← cellule spécifique
                 font.setBold(True)
             return font
@@ -70,4 +69,49 @@ class MyTableModel(QAbstractTableModel):
         """
         self.sorted_players_list = sorted_players_list
         self._data = [player.tab_list(active_tab_name) for player in sorted_players_list if player.position != 0]
+        self.layoutChanged.emit()
+
+
+class MyTableModelWeatherForecast(QAbstractTableModel):
+    def __init__(self):
+        super().__init__()
+        self._data = [session.show_weather_sample(i) for i in range(session.nb_weatherForecastSamples)]
+        self._header = ["Session", "Time\nOffset", "Rain %", "Weather", "Air\nTemperature", "Track\nTemperature"]
+
+    def rowCount(self, parent=QModelIndex()):
+        return len(self._data)
+
+    def columnCount(self, parent=QModelIndex()):
+        return 6
+
+    def updateCell(self, row, column, value):
+        self._data[row][column] = value
+        index = self.index(row, column)
+        self.dataChanged.emit(index, index, [Qt.DisplayRole])
+
+    def data(self, index, role=Qt.DisplayRole):
+        if role == Qt.DisplayRole:
+            return self._data[index.row()][index.column()]
+        if role == Qt.FontRole:
+            font = QFont("Segoe UI Emoji", 12)
+            return font
+
+    def flags(self, index):
+        return Qt.ItemIsEnabled
+
+    def headerData(self, section, orientation, role):
+        if role == Qt.DisplayRole:
+            if orientation == Qt.Horizontal:
+                return self._header[section]
+        if role == Qt.FontRole:
+            font = QFont()
+            font.setBold(True)
+            return font
+
+    def update_data(self, a, b):
+        """
+        sorted_players_list (list : Player) : List of Player sorted by position
+        active_tab_name (str) : Gives the name of the current tab
+        """
+        self._data = [session.show_weather_sample(i) for i in range(session.nb_weatherForecastSamples)]
         self.layoutChanged.emit()

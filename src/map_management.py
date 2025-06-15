@@ -25,7 +25,7 @@ def create_map(map_canvas):
     session.segments.insert(0, map_canvas.create_line(L1 + L0, width=3))
     for i in range(20):
         joueur = PLAYERS_LIST[i]
-        if session.Seance == 18 and i != 0:
+        if session.Session == 18 and i != 0:
             joueur.oval = map_canvas.create_oval(-1000 / d + x_const - WIDTH_POINTS,
                                                  -1000 / d + z_const - WIDTH_POINTS,
                                                  -1000 / d + x_const + WIDTH_POINTS,

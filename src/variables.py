@@ -24,11 +24,14 @@ except NameError:  # If the variables were not created yet
     button_list: list = ["Main Menu", "Damage", "Temperatures", "Laps", "Map", "ERS & Fuel", "Weather Forecast",
                                   "Packet Reception"]
     POSITION_CHANGED = False
+    REDRAW_MAP = True
 
 
     COLUMN_SIZE_DICTIONARY = {
         "Main": [8, 15, 8, 8, 10, 5, 10, 10, 10, 5],
         "Damage": [8, 15, 8, 15, 15, 12, 12, 10, 10, 10],
         "Laps": [8, 15, 8, 25, 25, 25],
-        "Temperatures": [8, 15, 8, 12, 12]
+        "Temperatures": [8, 15, 8, 12, 12],
+        "ERS && Fuel": [8, 15, 8, 8, 10, 10, 10],
+        "Weather Forecast": [15, 8, 10, 12, 12, 12]
     }

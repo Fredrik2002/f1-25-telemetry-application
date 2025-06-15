@@ -11,14 +11,15 @@ def update_motion(packet, *args):  # Packet 0
 
 
 def update_session(packet):  # Packet 1
-    global created_map
+    global REDRAW_MAP
     session.trackTemperature = packet.m_weather_forecast_samples[0].m_track_temperature
     session.airTemperature = packet.m_weather_forecast_samples[0].m_air_temperature
     session.nbLaps = packet.m_total_laps
     session.time_left = packet.m_session_time_left
-    if session.track != packet.m_track_id or session.Seance != packet.m_session_type: # Track or session has changed
+    if session.track != packet.m_track_id or session.Session != packet.m_session_type: # Track or session has changed
         session.track = packet.m_track_id
-    session.Seance = packet.m_session_type
+        REDRAW_MAP = True
+    session.Session = packet.m_session_type
     session.marshalZones = packet.m_marshal_zones  # Array[21]
     session.marshalZones[0].m_zone_start = session.marshalZones[0].m_zone_start - 1
     session.num_marshal_zones = packet.m_num_marshal_zones
@@ -27,9 +28,8 @@ def update_session(packet):  # Packet 1
     session.clear_slot()
     if packet.m_num_weather_forecast_samples != session.nb_weatherForecastSamples:
         session.nb_weatherForecastSamples = packet.m_num_weather_forecast_samples
-    for i in range(session.nb_weatherForecastSamples):
-        slot = packet.m_weather_forecast_samples[i]
-        session.add_slot(slot)
+    session.weatherList = packet.m_weather_forecast_samples
+
 
 def update_lap_data(packet):  # Packet 2
     global POSITION_CHANGED
