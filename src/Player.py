@@ -85,7 +85,7 @@ class Player:
         if name == "Main":
             return [self.position, self.name, tyres_dictionnary[self.tyres], self.tyresAgeLaps,
                     self.gap_to_leader, str(self.ERS_pourcentage)+'%', ERS_dictionary[self.ERS_mode], self.warnings,
-                    self.raceNumber, pit_dictionary[self.pit]]
+                    self.raceNumber, DRS_dict[self.drs], pit_dictionary[self.pit]]
         elif name == "Damage":
             return [self.position, self.name, tyres_dictionnary[self.tyres], self.show_tyres_list(self.tyre_wear),
                     self.show_tyres_list(self.tyre_blisters), self.show_front_wing_damage(),

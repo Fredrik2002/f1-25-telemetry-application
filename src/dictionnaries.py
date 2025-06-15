@@ -163,22 +163,22 @@ WeatherForecastAccuracy = {
 }
 
 packetDictionnary = {
-    0:"MotionPacket",
-    1:"SessionPacket",
-    2:"LapDataPacket",
-    3:"EventPacket",
-    4:"ParticipantsPacket",
-    5:"CarSetupPacket",
-    6:"CarTelemetryPacket",
-    7:"CarStatusPacket",
-    8:"FinalClassificationPacket",
-    9:"LobbyInfoPacket",
-    10:"CarDamagePacket",
-    11:"SessionHistoryPacket",
-    12:"TyreSets",
-    13:"MotionEx",
-    14:"Time Trial",
-    15:"Lap Positions"
+    0:"PacketMotionData",
+    1:"PacketSessionData",
+    2:"PacketLapData",
+    3:"PacketEventData",
+    4:"PacketParticipantsData",
+    5:"PacketCarSetupData",
+    6:"PacketCarTelemetryData",
+    7:"PacketCarStatusData",
+    8:"PacketFinalClassificationData",
+    9:"PacketLobbyInfoData",
+    10:"PacketCarDamageData",
+    11:"PacketSessionHistoryData",
+    12:"PacketTyreSetsData",
+    13:"PacketMotionExData",
+    14:"PacketTimeTrialData",
+    15:"PacketLapPositionsData"
 
 }
 

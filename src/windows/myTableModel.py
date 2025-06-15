@@ -1,5 +1,5 @@
 from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex
-from PyQt5.QtGui import QColor, QFont
+from PyQt5.QtGui import QFont
 
 from src.packet_management import *
 
@@ -114,4 +114,49 @@ class MyTableModelWeatherForecast(QAbstractTableModel):
         active_tab_name (str) : Gives the name of the current tab
         """
         self._data = [session.show_weather_sample(i) for i in range(session.nb_weatherForecastSamples)]
+        self.layoutChanged.emit()
+
+
+class MyTableModelPacketReception(QAbstractTableModel):
+    def __init__(self, data):
+        super().__init__()
+        self._data = data
+        self._header = ["Packet Type", "Reception"]
+
+    def rowCount(self, parent=QModelIndex()):
+        return len(self._data)
+
+    def columnCount(self, parent=QModelIndex()):
+        return 2
+
+    def updateCell(self, row, column, value):
+        self._data[row][column] = value
+        index = self.index(row, column)
+        self.dataChanged.emit(index, index, [Qt.DisplayRole])
+
+    def data(self, index, role=Qt.DisplayRole):
+        if role == Qt.DisplayRole:
+            return self._data[index.row()][index.column()]
+        if role == Qt.FontRole:
+            font = QFont("Segoe UI Emoji", 12)
+            return font
+
+    def flags(self, index):
+        return Qt.ItemIsEnabled
+
+    def headerData(self, section, orientation, role):
+        if role == Qt.DisplayRole:
+            if orientation == Qt.Horizontal:
+                return self._header[section]
+        if role == Qt.FontRole:
+            font = QFont()
+            font.setBold(True)
+            return font
+
+    def update_data(self, data):
+        """
+        sorted_players_list (list : Player) : List of Player sorted by position
+        active_tab_name (str) : Gives the name of the current tab
+        """
+        self._data = data
         self.layoutChanged.emit()
