@@ -29,8 +29,20 @@ class MyTableModel(QAbstractTableModel):
         if role == Qt.ForegroundRole:
             if index.column() == 2:  # Tyres column : they have their own color
                 return QColor(tyres_color_dictionnary[self._data[index.row()][index.column()]])
+            elif self._header[index.column()] == "DRS":
+                if self._data[index.row()][index.column()] == "DRS_a":
+                    self._data[index.row()][index.column()] = "DRS"
+                    return orange
+                elif self._data[index.row()][index.column()] == "DRS":
+                    return green
+                else:
+                    return white
+            elif self._header[index.column()] == "PIT":
+                return white
             else:
                 return QColor(teams_color_dictionary[self.sorted_players_list[index.row()].teamId])
+
+
         if role == Qt.FontRole:
             font = QFont("Segoe UI Emoji", 12)
             if index.column() == 2:  # ← cellule spécifique

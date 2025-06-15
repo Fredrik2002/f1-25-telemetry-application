@@ -1,7 +1,10 @@
 import time
 
+from PyQt5.QtWidgets import QListWidget
+
 from src.dictionnaries import *
 from src.map_management import *
+from src.utils import format_milliseconds
 
 
 def update_motion(packet, *args):  # Packet 0
@@ -67,24 +70,28 @@ def update_lap_data(packet):  # Packet 2
             session.tour_precedent = session.currentLap - 1
 
 
-def warnings(packet):  # Packet 3
-    if packet.m_event_string_code[3] == 71 and packet.m_event_details.m_start_lights.m_num_lights >= 2: # Starts lights : STLG
+def update_event(packet, qlist : QListWidget):  # Packet 3
+    code = "".join(map(chr, packet.m_event_string_code))
+    if code == "STLG" and packet.m_event_details.m_start_lights.m_num_lights >= 2: # Start Lights
         session.formationLapDone = True
-        print(f"{packet.m_event_details.m_start_lights.m_num_lights} red lights ")
-    elif packet.m_event_string_code[0] == 76 and session.formationLapDone: #Lights out : LGOT
-        print("Lights out !")
+        qlist.insertItem(0, f"{packet.m_event_details.m_start_lights.m_num_lights} red lights ")
+    elif code == "LGOT" and session.formationLapDone: # Lights out
+        qlist.insertItem(0, "Lights out !")
         session.formationLapDone = False
         session.startTime = time.time()
         for joueur in PLAYERS_LIST:  # We reset all the datas (which were from qualifying)
-            joueur.S200_reached = False
-            joueur.warnings = 0
-            joueur.lastLapSectors = [0] * 3
-            joueur.bestLapSectors = [0] * 3
-            joueur.lastLapTime = 0
-            joueur.currentSectors = [0] * 3
-            joueur.fastestLapTime = 0
-    elif packet.m_event_string_code[2] == 82:
-        PLAYERS_LIST[packet.m_event_details.m_vehicle_idx].hasRetired = True
+            joueur.reset()
+    elif code == "RTMT":  # Retirement
+        PLAYERS_LIST[packet.m_event_details.m_retirement.m_vehicle_idx].hasRetired = True
+        qlist.insertItem(0, f"{PLAYERS_LIST[packet.m_event_details.m_retirement.m_vehicle_idx].name} retired : " +
+                         f"{retirements_dictionnary[packet.m_event_details.m_retirement.m_reason]}")
+    elif code == "FTLP":  # Fastest Lap
+        qlist.insertItem(0, f"Fastest Lap : {PLAYERS_LIST[packet.m_event_details.m_fastest_lap.m_vehicle_idx].name} - "
+                            f"{format_milliseconds(packet.m_event_details.m_fastest_lap.m_lap_time*1000)}")
+    elif code == "DRSD":  # DRS Disabled
+        qlist.insertItem(0, f"DRS Disabled : {drs_disabled_reasons[packet.m_event_details.m_drs_disabled.m_reason]}")
+    elif code == "DRSE":  # DRS Enabled
+        qlist.insertItem(0, "DRS Enabled")
 
 def update_participants(packet):  # Packet 4
     for index in range(22):
@@ -130,6 +137,8 @@ def update_car_status(packet):  # Packet 7
             joueur.tyres = element.m_visual_tyre_compound
         joueur.ERS_mode = element.m_ers_deploy_mode
         joueur.ERS_pourcentage = round(element.m_ers_store_energy / 40_000)
+        joueur.DRS_allowed = element.m_drs_allowed
+        joueur.DRS_activation_distance = element.m_drs_activation_distance
 
 def update_car_damage(packet):  # Packet 10
     for index in range(22):

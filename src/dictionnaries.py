@@ -21,6 +21,7 @@ red = QColor("#FF0000")
 purple = QColor("#880088")
 gold = QColor("#FFD700")
 grey = QColor("#4B4B4B")
+orange = QColor("#FF9300")
 
 
 tyres_dictionnary = {
@@ -188,6 +189,27 @@ safetyCarStatusDict = {
     2:"VSC",
     3:"FL",
     4:""
+}
+
+retirements_dictionnary = {
+    0 : "",
+    1 : "Manual Retirement",
+    2 : "Finished !",
+    3 : "Terminal Damage",
+    4 : "Inactivity",
+    5 : "Not enough laps completed",
+    6 : "Disqualified",
+    7 : "Red flagged",
+    8 : "Mechanical failure",
+    9 : "Session skipped",
+    10 : "Session simulated"
+}
+
+drs_disabled_reasons = {
+    0 : "Wet track",
+    1 : "Safety Car Deployed",
+    2 : "Red flag",
+    3 : "Minimun lap not reached"
 }
 
 

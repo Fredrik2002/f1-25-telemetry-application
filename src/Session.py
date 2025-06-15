@@ -1,6 +1,7 @@
 from src.dictionnaries import session_dictionary, track_dictionary, weather_dictionary, color_flag_dict
 from src.parsers.parser2025 import WeatherForecastSample
-from src.utils import conversion
+from src.utils import format_minutes
+
 
 class Session:
     def __init__(self):
@@ -67,9 +68,9 @@ class Session:
             string = f"Session : {session_dictionary[self.Session]}, Lap : {self.currentLap}/{self.nbLaps}, " \
                         f"Air : {self.airTemperature}°C / Track : {self.trackTemperature}°C"
         elif self.Session in [5, 6, 7, 8, 9]:
-            string = f" Qualy : {conversion(self.time_left, 1)}"
+            string = f" Qualy : {format_minutes(self.time_left)}"
         else:
-            string = f" FP : {conversion(self.time_left, 1)}"
+            string = f" FP : {format_minutes(self.time_left)}"
         return string
 
     def update_marshal_zones(self, map_canvas):

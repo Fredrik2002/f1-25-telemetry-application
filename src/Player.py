@@ -5,7 +5,7 @@ from PyQt5.QtGui import QPen
 
 import src.variables
 from src.dictionnaries import *
-from src.utils import conversion
+from src.utils import format_milliseconds
 
 
 class Player:
@@ -37,6 +37,8 @@ class Player:
         self.driverStatus = 0
         self.fastestLapTime = 0
         self.drs: int = 0
+        self.DRS_allowed : int = 0
+        self.DRS_activation_distance : int = 0
         self.yourTelemetry: int = 0
         self.speed: int = 0
         self.rearWingDamage = 0
@@ -69,6 +71,15 @@ class Player:
         except AttributeError:
             raise AttributeError("Cannot compare Player with a non-Player object")
 
+    def reset(self):
+        self.S200_reached = False
+        self.warnings = 0
+        self.lastLapSectors = [0] * 3
+        self.bestLapSectors = [0] * 3
+        self.lastLapTime = 0
+        self.currentSectors = [0] * 3
+        self.fastestLapTime = 0
+
     def show_tyres_list(self, tyres_list):
         return f"{tyres_list[2]} {tyres_list[3]} \n{tyres_list[0]} {tyres_list[1]}"
 
@@ -81,20 +92,32 @@ class Player:
                 return "+" + '%.2f'% self.fuelRemainingLaps + " Laps"
         return '%.2f'% self.fuelRemainingLaps + " Laps"
 
+    def show_drs(self):
+        if self.DRS_allowed == 1:
+            if self.drs == 0:
+                return "DRS_a"
+            else:
+                return "DRS"
+        elif self.DRS_activation_distance > 0:
+            return str(self.DRS_activation_distance) + "m"
+        else:
+            return ""
+
+
     def tab_list(self, name):
         if name == "Main":
             return [self.position, self.name, tyres_dictionnary[self.tyres], self.tyresAgeLaps,
                     self.gap_to_leader, str(self.ERS_pourcentage)+'%', ERS_dictionary[self.ERS_mode], self.warnings,
-                    self.raceNumber, DRS_dict[self.drs], pit_dictionary[self.pit]]
+                    self.raceNumber, self.show_drs(), pit_dictionary[self.pit]]
         elif name == "Damage":
             return [self.position, self.name, tyres_dictionnary[self.tyres], self.show_tyres_list(self.tyre_wear),
                     self.show_tyres_list(self.tyre_blisters), self.show_front_wing_damage(),
              self.rearWingDamage, self.floorDamage, self.diffuserDamage, self.sidepodDamage]
         elif name == "Laps":
             return [self.position, self.name, tyres_dictionnary[self.tyres],
-                    f"{conversion(self.currentLapTime, 2)} [{', '.join('%.3f'%truc for truc in self.currentSectors)}]",
-                    f"{conversion(self.lastLapTime, 2)} [{', '.join('%.3f'%truc for truc in self.lastLapSectors)}]",
-                    f"{conversion(self.fastestLapTime, 2)} [{', '.join('%.3f' % truc for truc in self.bestLapSectors)}]",
+                    f"{format_milliseconds(self.currentLapTime)} [{', '.join('%.3f'%truc for truc in self.currentSectors)}]",
+                    f"{format_milliseconds(self.lastLapTime)} [{', '.join('%.3f'%truc for truc in self.lastLapSectors)}]",
+                    f"{format_milliseconds(self.fastestLapTime)} [{', '.join('%.3f' % truc for truc in self.bestLapSectors)}]",
                     ]
         elif name == "Temperatures":
             return [self.position, self.name, tyres_dictionnary[self.tyres],
@@ -105,45 +128,6 @@ class Player:
         else:
             raise ValueError(f"Unrecognized Tab Name : {name}")
 
-    def printing(self, buttonId, liste_joueurs, session):
-        if buttonId == 0:  # Menu principal
-            if session in [5, 6, 7, 8, 9, 13]: # Qualif
-                return (
-                    f"P{self.position}, {self.name} Lap :{conversion(self.currentLapTime, 2)} {ERS_dictionary[self.ERS_mode]},"
-                    f" num = {self.raceNumber} Last lap : {conversion(self.lastLapTime, 2)}"
-                    f" Fastest lap : {conversion(self.fastestLapTime, 2)} {pit_dictionary[self.pit]}")
-            else: #Course
-                return f"P{self.position}, {self.name} {self.tyresAgeLaps} tours " \
-                       f"Gap :{'%.3f'%(self.gap_to_leader / 1000)} {self.ERS_pourcentage}% {ERS_dictionary[self.ERS_mode]} " \
-                       f"Warnings = {self.warnings} num = {self.raceNumber} {pit_dictionary[self.pit]} {DRS_dict[self.drs]} "
-
-        elif buttonId == 1:  # Dégâts
-            return (f"P{self.position}, {self.name} "
-                    f"usure = {self.tyre_wear}, blisters = {self.tyre_blisters}, FW = [{self.frontLeftWingDamage},  "
-                    f"{self.frontRightWingDamage}] | "
-                    f"RW ={self.rearWingDamage} | "
-                    f"floor = {self.floorDamage} | "
-                    f"diffuser = {self.diffuserDamage} | "
-                    f"sidepod = {self.sidepodDamage} | "
-                    f"{pit_dictionary[self.pit]}")
-
-        elif buttonId == 2:  # Températures
-            return (
-                f"P{self.position}  {self.name},  RL : {self.tyres_temp_surface[0]}|{self.tyres_temp_inner[0]}, "
-                f"RR :{self.tyres_temp_surface[1]}|{self.tyres_temp_inner[1]} "
-                f"FL : {self.tyres_temp_surface[2]}|{self.tyres_temp_inner[2]}, "
-                f"FR : {self.tyres_temp_surface[3]}|{self.tyres_temp_inner[3]}, {pit_dictionary[self.pit]} ")
-
-        elif buttonId == 3:  # Laps
-            return f"P{self.position}, {self.name} "+ \
-            f"Current lap : {conversion(self.currentLapTime, 2)} [{', '.join('%.3f'%truc for truc in self.currentSectors)}] " + \
-            f"Last lap : {conversion(self.lastLapTime, 2)} [{', '.join('%.3f'%truc for truc in self.lastLapSectors)}]  " + \
-            f"Fastest lap : {conversion(self.fastestLapTime, 2)} [{', '.join('%.3f' % truc for truc in self.bestLapSectors)}] "  + \
-            f"{pit_dictionary[self.pit]}"
-
-        elif buttonId == 4:
-            return f"P{self.position}, {self.name} ERS = {self.ERS_pourcentage}% | {ERS_dictionary[self.ERS_mode]}  " \
-                   f"Fuel = {round(self.fuelRemainingLaps, 2)} tours | {self.penalties}s | {self.speed_trap}km/h"
 
     def is_not_on_lap(self):
         return self.currentLapTime == 0 or (self.yourTelemetry==1 and self.ERS_mode == 0) or \

@@ -9,7 +9,7 @@ sys.path.append("../src")
 from PyQt5.QtGui import QFont, QPainter, QPen, QPolygonF
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QTableView, QVBoxLayout, QWidget, QTabWidget, QHBoxLayout, QLabel, QAbstractItemView,
-    QTabBar
+    QTabBar, QListWidget
 )
 
 from src.packet_management import *
@@ -28,30 +28,14 @@ class FixedSizeTabBar(QTabBar):
             4: 140,
             5: 70,
             6: 220,
-            7: 200
+            7: 200,
+            8: 200
         }
         width = custom_widths.get(index, default_size.width())
         return QSize(width, default_size.height())
 
 class MainWindow(QMainWindow):
-    function_hashmap = {  # PacketId : (fonction, arguments)
-        0: (update_motion, ()),  # PacketMotion
-        1: (update_session, ()),  # PacketSession
-        2: (update_lap_data, ()),  # PacketLapData
-        3: (warnings, ()),  # PacketEvent
-        4: (update_participants, ()),  # PacketParticipants
-        5: (update_car_setups, ()),  # PacketCarSetup
-        6: (update_car_telemetry, ()),  # PacketCarTelemetry
-        7: (update_car_status, ()),  # PacketCarStatus
-        8: (nothing, ()),  # PacketFinalClassification
-        9: (nothing, ()),  # PacketLobbyInfo
-        10: (update_car_damage, ()),  # PacketCarDamage
-        11: (nothing, ()),  # PacketSessionHistory
-        12: (nothing, ()),
-        13: (nothing, ()),
-        14: (nothing, ()),
-        15: (nothing, ())
-    }
+
 
     def __init__(self):
         super().__init__()
@@ -65,6 +49,8 @@ class MainWindow(QMainWindow):
         self.main_layout = QVBoxLayout()
         self.map_canvas = None
         self.weather_table = None
+        self.label_weather_accuracy = None
+        self.race_direction_list = None
 
         self.tabs = QTabWidget()
         self.tabs.currentChanged.connect(self.tabChanged)
@@ -91,11 +77,31 @@ class MainWindow(QMainWindow):
         self.create_map_tab()
         self.create_weather_tab()
         self.create_packet_reception_tab()
+        self.create_race_direction_tab()
 
         container = QWidget()
         container.setLayout(self.main_layout)
         self.setCentralWidget(container)
         self.setup_table_columns()
+
+        MainWindow.function_hashmap = {  # PacketId : (fonction, arguments)
+            0: (update_motion, ()),  # PacketMotion
+            1: (update_session, ()),  # PacketSession
+            2: (update_lap_data, ()),  # PacketLapData
+            3: (update_event, [self.race_direction_list]),  # PacketEvent
+            4: (update_participants, ()),  # PacketParticipants
+            5: (update_car_setups, ()),  # PacketCarSetup
+            6: (update_car_telemetry, ()),  # PacketCarTelemetry
+            7: (update_car_status, ()),  # PacketCarStatus
+            8: (nothing, ()),  # PacketFinalClassification
+            9: (nothing, ()),  # PacketLobbyInfo
+            10: (update_car_damage, ()),  # PacketCarDamage
+            11: (nothing, ()),  # PacketSessionHistory
+            12: (nothing, ()),
+            13: (nothing, ()),
+            14: (nothing, ()),
+            15: (nothing, ())
+        }
 
     def tabChanged(self):
         self.setup_table_columns()
@@ -121,11 +127,13 @@ class MainWindow(QMainWindow):
         func(packet, *args)
         active_tab_name = self.tabs.tabText(self.tabs.currentIndex())
         sorted_players_list = sorted(PLAYERS_LIST)
-        if active_tab_name != "Packet Reception":
+        if active_tab_name not in ["Packet Reception", "Race Direction"]:
             self.models[active_tab_name].update_data(sorted_players_list, active_tab_name)
 
         if header.m_packet_id == 1:
             self.title_label.setText(session.title_display())
+            self.label_weather_accuracy.setText(f"Weather accuracy : {WeatherForecastAccuracy[session.weatherForecastAccuracy]}")
+
         self.packet_reception_dict[header.m_packet_id] += 1
         if time.time() > self.last_update + 1:
             data = [
@@ -170,6 +178,8 @@ class MainWindow(QMainWindow):
     def create_weather_tab(self):
         tab = QWidget(self)
         layout = QVBoxLayout()
+        self.label_weather_accuracy = QLabel(f"Weather accuracy : {WeatherForecastAccuracy[session.weatherForecastAccuracy]}")
+        self.label_weather_accuracy.setFont(QFont("Segoe UI Emoji", 12))
         table = QTableView()
         table.setWordWrap(True)
         self.tables["Weather Forecast"] = table
@@ -177,6 +187,7 @@ class MainWindow(QMainWindow):
 
         table.setModel(self.models["Weather Forecast"])
         table.verticalHeader().setVisible(False)
+        layout.addWidget(self.label_weather_accuracy)
         layout.addWidget(table)
         tab.setLayout(layout)
         self.tabs.addTab(tab, "Weather Forecast")
@@ -205,6 +216,19 @@ class MainWindow(QMainWindow):
         table.resizeRowsToContents()
         table.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
         table.setHorizontalScrollMode(QAbstractItemView.ScrollPerPixel)
+
+    def create_race_direction_tab(self):
+        tab = QWidget(self)
+        layout = QVBoxLayout()
+        self.race_direction_list = QListWidget()
+        self.race_direction_list.setFont(QFont("Segoe UI Emoji", 12))
+
+        layout.addWidget(self.race_direction_list)
+        tab.setLayout(layout)
+        self.tabs.addTab(tab, "Race Direction")
+        self.race_direction_list.setWordWrap(True)
+        self.race_direction_list.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
+        self.race_direction_list.setHorizontalScrollMode(QAbstractItemView.ScrollPerPixel)
 
     def resizeEvent(self, event):
         self.setup_table_columns()
