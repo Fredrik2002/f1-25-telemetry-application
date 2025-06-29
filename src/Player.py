@@ -1,11 +1,8 @@
-import math
-
 from PyQt5.QtCore import QRectF
 from PyQt5.QtGui import QPen
 
-import src.variables
 from src.dictionnaries import *
-from src.utils import format_milliseconds
+import src
 
 
 class Player:
@@ -115,9 +112,9 @@ class Player:
              self.rearWingDamage, self.floorDamage, self.diffuserDamage, self.sidepodDamage]
         elif name == "Laps":
             return [self.position, self.name, tyres_dictionnary[self.tyres],
-                    f"{format_milliseconds(self.currentLapTime)} [{', '.join('%.3f'%truc for truc in self.currentSectors)}]",
-                    f"{format_milliseconds(self.lastLapTime)} [{', '.join('%.3f'%truc for truc in self.lastLapSectors)}]",
-                    f"{format_milliseconds(self.fastestLapTime)} [{', '.join('%.3f' % truc for truc in self.bestLapSectors)}]",
+                    f"{src.variables.format_milliseconds(self.currentLapTime)} [{', '.join('%.3f'%truc for truc in self.currentSectors)}]",
+                    f"{src.variables.format_milliseconds(self.lastLapTime)} [{', '.join('%.3f'%truc for truc in self.lastLapSectors)}]",
+                    f"{src.variables.format_milliseconds(self.fastestLapTime)} [{', '.join('%.3f' % truc for truc in self.bestLapSectors)}]",
                     ]
         elif name == "Temperatures":
             return [self.position, self.name, tyres_dictionnary[self.tyres],

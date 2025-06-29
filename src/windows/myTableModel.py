@@ -1,7 +1,9 @@
 from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex
 from PyQt5.QtGui import QFont
 
+from src.Player import Player
 from src.packet_management import *
+from src.variables import PLAYERS_LIST, session
 
 
 class MyTableModel(QAbstractTableModel):

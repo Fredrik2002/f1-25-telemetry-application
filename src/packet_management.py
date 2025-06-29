@@ -3,8 +3,7 @@ import time
 from PyQt5.QtWidgets import QListWidget
 
 from src.dictionnaries import *
-from src.map_management import *
-from src.utils import format_milliseconds
+from src.variables import format_milliseconds
 
 
 def update_motion(packet, *args):  # Packet 0

@@ -1,0 +1,50 @@
+QWidget {
+    background-color: #2b2b2b;
+    color: #f0f0f0;
+}
+QTabWidget::pane {
+    border: 1px solid #444;
+}
+QHeaderView::section {
+    background-color: #3c3c3c;
+    color: white;
+    padding: 4px;
+    border: 1px solid #444;
+    font-size: 12pt;
+    font-weight: bold
+}
+QTableView {
+    gridline-color: #555;
+    selection-background-color: #555;
+    selection-color: white;
+}
+QTabWidget::pane {
+border: 1px solid #444;
+background-color: #222;
+}
+
+QTabBar::tab {
+    height: 40px;
+    background: #333;
+    color: white;
+    padding: 6px;
+    border: 1px solid #555;
+    border-bottom: none;
+    font-size: 12pt;
+}
+
+QTabBar::tab:selected {
+    background: #222;
+    color: white;
+    font-weight: bold;
+    font-size: 12pt;
+}
+
+QTabBar::tab:hover {
+    background: #444;
+    font-size: 12pt;
+}
+
+QLabel{
+    font-size: 18pt;
+}
