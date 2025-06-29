@@ -490,6 +490,7 @@ class EventDataDetails(ctypes.Union, PacketMixin):  # Potentiel Problème ici
     _fields_ = [
         ("m_fastest_lap", FastestLap),
         ("m_retirement", Retirement),
+        ("m_drs_disabled", DRSDisabled),
         ("m_team_mate_in_pits", TeamMateInPits),
         ("m_race_winner", RaceWinner),
         ("m_penalty", Penalty),

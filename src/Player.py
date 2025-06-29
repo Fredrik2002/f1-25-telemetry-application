@@ -1,23 +1,29 @@
+import math
+
+from PyQt5.QtCore import QRectF
+from PyQt5.QtGui import QPen
+
+import src.variables
 from src.dictionnaries import *
-from src.utils import conversion
+from src.utils import format_milliseconds
 
 
 class Player:
     def __init__(self):
-        self.position: int = 0
-        self.tyre_wear = []
-        self.tyre_blisters = []
+        self.position: int = 1
+        self.tyre_wear = ["0.00", "0.00", "0.00", "0.00"]
+        self.tyre_blisters = [0,0,0,0]
         self.tyres = 0
         self.warnings = 0
         self.ERS_mode = -1
         self.ERS_pourcentage = 0
         self.fuelRemainingLaps = 0
         self.fuelMix = 0
-        self.numero = 0
+        self.raceNumber = 0
         self.teamId = -1
         self.pit: int = 0
-        self.FrontLeftWingDamage = 0
-        self.FrontRightWingDamage = 0
+        self.frontLeftWingDamage = 0
+        self.frontRightWingDamage = 0
         self.tyres_temp_inner = [0, 0, 0, 0]
         self.tyres_temp_surface = [0, 0, 0, 0]
         self.tyresAgeLaps = 0
@@ -29,8 +35,10 @@ class Player:
         self.worldPositionZ = 0
         self.penalties = 0
         self.driverStatus = 0
-        self.bestLapTime = 0
+        self.fastestLapTime = 0
         self.drs: int = 0
+        self.DRS_allowed : int = 0
+        self.DRS_activation_distance : int = 0
         self.yourTelemetry: int = 0
         self.speed: int = 0
         self.rearWingDamage = 0
@@ -41,58 +49,85 @@ class Player:
         self.S200_reached = True
         self.currentLapTime = 0
         self.setup_array = []
-        self.oval = None
+        self.oval : QRectF = None
+        self.qpen : QPen = None
         self.Xmove = 0
         self.Zmove = 0
         self.etiquette = ""
         self.aiControlled = -1
         self.hasRetired = False
         self.speed_trap = 0
-        self.delta_to_leader = 0
+        self.gap_to_leader = 0
         self.currentLapInvalid = 1
 
     def __str__(self):
         return self.name + str(self.position)
 
-    def printing(self, buttonId, liste_joueurs, session):
-        if buttonId == 0:  # Menu principal
-            if session in [5, 6, 7, 8, 9, 13]: # Qualif
-                return (
-                    f"P{self.position}, {self.name} Lap :{conversion(self.currentLapTime, 2)} {ERS_dictionary[self.ERS_mode]},"
-                    f" num = {self.numero} Last lap : {conversion(self.lastLapTime, 2)}"
-                    f" Fastest lap : {conversion(self.bestLapTime, 2)} {pit_dictionary[self.pit]}")
-            else: #Course
-                return f"P{self.position}, {self.name} {self.tyresAgeLaps} tours " \
-                       f"Gap :{'%.3f'%(self.delta_to_leader/1000)} {self.ERS_pourcentage}% {ERS_dictionary[self.ERS_mode]} " \
-                       f"Warnings = {self.warnings} num = {self.numero} {pit_dictionary[self.pit]} {DRS_dict[self.drs]} "
+    def __lt__(self, other):  # For sorting players by positions
+        if self.position == 0:  # We want this player at the bottom of our table (not displayed)
+            return False
+        try:
+            return self.position < other.position
+        except AttributeError:
+            raise AttributeError("Cannot compare Player with a non-Player object")
 
-        elif buttonId == 1:  # Dégâts
-            return (f"P{self.position}, {self.name} "
-                    f"usure = {self.tyre_wear}, blisters = {self.tyre_blisters}, FW = [{self.FrontLeftWingDamage},  "
-                    f"{self.FrontRightWingDamage}] | "
-                    f"RW ={self.rearWingDamage} | "
-                    f"floor = {self.floorDamage} | "
-                    f"diffuser = {self.diffuserDamage} | "
-                    f"sidepod = {self.sidepodDamage} | "
-                    f"{pit_dictionary[self.pit]}")
+    def reset(self):
+        self.S200_reached = False
+        self.warnings = 0
+        self.lastLapSectors = [0] * 3
+        self.bestLapSectors = [0] * 3
+        self.lastLapTime = 0
+        self.currentSectors = [0] * 3
+        self.fastestLapTime = 0
 
-        elif buttonId == 2:  # Températures
-            return (
-                f"P{self.position}  {self.name},  RL : {self.tyres_temp_surface[0]}|{self.tyres_temp_inner[0]}, "
-                f"RR :{self.tyres_temp_surface[1]}|{self.tyres_temp_inner[1]} "
-                f"FL : {self.tyres_temp_surface[2]}|{self.tyres_temp_inner[2]}, "
-                f"FR : {self.tyres_temp_surface[3]}|{self.tyres_temp_inner[3]}, {pit_dictionary[self.pit]} ")
+    def show_tyres_list(self, tyres_list):
+        return f"{tyres_list[2]} {tyres_list[3]} \n{tyres_list[0]} {tyres_list[1]}"
 
-        elif buttonId == 3:  # Laps
-            return f"P{self.position}, {self.name} "+ \
-            f"Current lap : {conversion(self.currentLapTime, 2)} [{', '.join('%.3f'%truc for truc in self.currentSectors)}] " + \
-            f"Last lap : {conversion(self.lastLapTime, 2)} [{', '.join('%.3f'%truc for truc in self.lastLapSectors)}]  " + \
-            f"Fastest lap : {conversion(self.bestLapTime, 2)} [{', '.join('%.3f'%truc for truc in self.bestLapSectors)}] "  + \
-            f"{pit_dictionary[self.pit]}"
+    def show_front_wing_damage(self):
+        return f"{self.frontLeftWingDamage}-{self.frontRightWingDamage}"
 
-        elif buttonId == 4:
-            return f"P{self.position}, {self.name} ERS = {self.ERS_pourcentage}% | {ERS_dictionary[self.ERS_mode]}  " \
-                   f"Fuel = {round(self.fuelRemainingLaps, 2)} tours | {self.penalties}s | {self.speed_trap}km/h"
+    def show_fuel(self):
+        if src.variables.session.Session in [15, 16, 17]:
+            if self.fuelRemainingLaps > 0:
+                return "+" + '%.2f'% self.fuelRemainingLaps + " Laps"
+        return '%.2f'% self.fuelRemainingLaps + " Laps"
+
+    def show_drs(self):
+        if self.DRS_allowed == 1:
+            if self.drs == 0:
+                return "DRS_a"
+            else:
+                return "DRS"
+        elif self.DRS_activation_distance > 0:
+            return str(self.DRS_activation_distance) + "m"
+        else:
+            return ""
+
+
+    def tab_list(self, name):
+        if name == "Main":
+            return [self.position, self.name, tyres_dictionnary[self.tyres], self.tyresAgeLaps,
+                    self.gap_to_leader, str(self.ERS_pourcentage)+'%', ERS_dictionary[self.ERS_mode], self.warnings,
+                    self.raceNumber, self.show_drs(), pit_dictionary[self.pit]]
+        elif name == "Damage":
+            return [self.position, self.name, tyres_dictionnary[self.tyres], self.show_tyres_list(self.tyre_wear),
+                    self.show_tyres_list(self.tyre_blisters), self.show_front_wing_damage(),
+             self.rearWingDamage, self.floorDamage, self.diffuserDamage, self.sidepodDamage]
+        elif name == "Laps":
+            return [self.position, self.name, tyres_dictionnary[self.tyres],
+                    f"{format_milliseconds(self.currentLapTime)} [{', '.join('%.3f'%truc for truc in self.currentSectors)}]",
+                    f"{format_milliseconds(self.lastLapTime)} [{', '.join('%.3f'%truc for truc in self.lastLapSectors)}]",
+                    f"{format_milliseconds(self.fastestLapTime)} [{', '.join('%.3f' % truc for truc in self.bestLapSectors)}]",
+                    ]
+        elif name == "Temperatures":
+            return [self.position, self.name, tyres_dictionnary[self.tyres],
+            self.show_tyres_list(self.tyres_temp_surface), self.show_tyres_list(self.tyres_temp_inner)]
+        elif name == "ERS && Fuel":
+            return [self.position, self.name, tyres_dictionnary[self.tyres], str(self.ERS_pourcentage)+'%',
+                    ERS_dictionary[self.ERS_mode], self.show_fuel(), fuel_dict[self.fuelMix]]
+        else:
+            raise ValueError(f"Unrecognized Tab Name : {name}")
+
 
     def is_not_on_lap(self):
         return self.currentLapTime == 0 or (self.yourTelemetry==1 and self.ERS_mode == 0) or \

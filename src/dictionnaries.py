@@ -1,3 +1,5 @@
+from PyQt5.QtGui import QColor
+
 
 def rgbtohex(r,g,b):
     return f'#{r:02x}{g:02x}{b:02x}'
@@ -10,15 +12,16 @@ def valid_ip_address(adress):
             drapeau = False
     return drapeau
 
-black = "#000000"
-white = "#FFFFFF"
-green = "#00FF00"
-blue = "#0000FF"
-yellow = "#FFD700"
-red = "#FF0000"
-purple = "#880088"
-gold = "#FFD700"
-grey = "#4B4B4B"
+black = QColor("#000000")
+white = QColor("#FFFFFF")
+green = QColor("#00FF00")
+blue = QColor("#0000FF")
+yellow = QColor("#FFD700")
+red = QColor("#FF0000")
+purple = QColor("#880088")
+gold = QColor("#FFD700")
+grey = QColor("#4B4B4B")
+orange = QColor("#FF9300")
 
 
 tyres_dictionnary = {
@@ -31,12 +34,11 @@ tyres_dictionnary = {
 }
 
 tyres_color_dictionnary = {
-    0:"#FF0000",
-    16: "#FF0000",
-    17: "#FFD700",
-    18: "#FFFFFF",
-    7: "#00FF00",
-    8: "#0000FF"
+    "S": "#FF0000",
+    "M": "#FFD700",
+    "H": "#FFFFFF",
+    "I": "#00FF00",
+    "W": "#0000FF"
 }
 
 track_dictionary = { #(track name, highNumber=Small on canvas, x_offset, y_offset)
@@ -79,20 +81,20 @@ track_dictionary = { #(track name, highNumber=Small on canvas, x_offset, y_offse
 }
 
 teams_color_dictionary = {
-    -1: "#FFFFFF",
-    0: "#00C7CD",
-    1: "#FF0000",
-    2: "#0000FF",
-    3: "#5097FF",
-    4: "#00902A",
-    5: "#009BFF",
-    6: "#00446F",
-    7: "#95ACBB",
-    8: "#FFAE00",
-    9: "#980404",
-    41:"#000000",
-    104: "#670498",
-    255: "#670498"
+    -1: QColor("#FFFFFF"),
+    0: QColor("#00C7CD"),
+    1: QColor("#FF0000"),
+    2: QColor("#0000FF"),
+    3: QColor("#5097FF"),
+    4: QColor("#00902A"),
+    5: QColor("#009BFF"),
+    6: QColor("#00446F"),
+    7: QColor("#95ACBB"),
+    8: QColor("#FFAE00"),
+    9: QColor("#980404"),
+    41:QColor("#000000"),
+    104: QColor("#670498"),
+    255: QColor("#670498")
 }
 
 teams_name_dictionary = {
@@ -111,12 +113,12 @@ teams_name_dictionary = {
 }
 
 weather_dictionary = {
-    0: "Dégagé",
-    1: "Légèrement nuageux",
-    2: "Couvert",
-    3: "Pluie fine",
-    4: "Pluie forte",
-    5: "Tempête"
+    0: "☀️ Clear",
+    1: "🌥️ Light Cloud",
+    2: "☁️ Overcast",
+    3: "🌦️ Light Rain",
+    4: "🌧️ Heavy Rain",
+    5: "⛈️ Storm"
 }
 
 fuel_dict = {
@@ -137,7 +139,7 @@ ERS_dictionary = {
     1: "MEDIUM",
     2: "HOTLAP",
     3: "OVERTAKE",
-    -1: "PRIVÉE"
+    -1: "PRIVATE"
 }
 
 session_dictionary = {
@@ -157,27 +159,27 @@ DRS_dict = {0: "", 1: "DRS"}
 
 WeatherForecastAccuracy = {
     -1: "Unknown",
-    0: "Parfaite",
+    0: "Perfect",
     1: "Approximative"
 }
 
 packetDictionnary = {
-    0:"MotionPacket",
-    1:"SessionPacket",
-    2:"LapDataPacket",
-    3:"EventPacket",
-    4:"ParticipantsPacket",
-    5:"CarSetupPacket",
-    6:"CarTelemetryPacket",
-    7:"CarStatusPacket",
-    8:"FinalClassificationPacket",
-    9:"LobbyInfoPacket",
-    10:"CarDamagePacket",
-    11:"SessionHistoryPacket",
-    12:"TyreSets",
-    13:"MotionEx",
-    14:"Time Trial",
-    15:"Lap Positions"
+    0:"PacketMotionData",
+    1:"PacketSessionData",
+    2:"PacketLapData",
+    3:"PacketEventData",
+    4:"PacketParticipantsData",
+    5:"PacketCarSetupData",
+    6:"PacketCarTelemetryData",
+    7:"PacketCarStatusData",
+    8:"PacketFinalClassificationData",
+    9:"PacketLobbyInfoData",
+    10:"PacketCarDamageData",
+    11:"PacketSessionHistoryData",
+    12:"PacketTyreSetsData",
+    13:"PacketMotionExData",
+    14:"PacketTimeTrialData",
+    15:"PacketLapPositionsData"
 
 }
 
@@ -187,6 +189,27 @@ safetyCarStatusDict = {
     2:"VSC",
     3:"FL",
     4:""
+}
+
+retirements_dictionnary = {
+    0 : "",
+    1 : "Manual Retirement",
+    2 : "Finished !",
+    3 : "Terminal Damage",
+    4 : "Inactivity",
+    5 : "Not enough laps completed",
+    6 : "Disqualified",
+    7 : "Red flagged",
+    8 : "Mechanical failure",
+    9 : "Session skipped",
+    10 : "Session simulated"
+}
+
+drs_disabled_reasons = {
+    0 : "Wet track",
+    1 : "Safety Car Deployed",
+    2 : "Red flag",
+    3 : "Minimun lap not reached"
 }
 
 
