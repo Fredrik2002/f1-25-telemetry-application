@@ -92,6 +92,9 @@ def update_event(packet, qlist : QListWidget):  # Packet 3
         qlist.insertItem(0, f"DRS Disabled : {drs_disabled_reasons[packet.m_event_details.m_drs_disabled.m_reason]}")
     elif code == "DRSE":  # DRS Enabled
         qlist.insertItem(0, "DRS Enabled")
+    elif code == "CHQF":
+        qlist.insertItem(0, "Chequered Flag")
+        
 
 def update_participants(packet):  # Packet 4
     for index in range(22):

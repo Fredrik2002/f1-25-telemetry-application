@@ -280,7 +280,7 @@ class Canvas(QWidget):
         L0, L1, = [], []
         L = [[]]
         track_name, coeff, x_offset, z_offset = track_dictionary[session.track]
-        with open(f"../tracks/{track_name}_2020_racingline.txt", "r") as file:
+        with open(tracks_folder / f"{track_name}_2020_racingline.txt", "r") as file:
             for index, line in enumerate(file):
                 if index not in [0,1]:
                     dist, z, x, y, _, _ = line.strip().split(",")
