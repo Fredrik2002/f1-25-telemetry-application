@@ -1,8 +1,8 @@
 from ttkbootstrap import Toplevel, LEFT, Entry, IntVar, Label
 from tkinter import Message, Checkbutton, Button
 import json
-from src.dictionnaries import valid_ip_address
-from src.variables import dictionnary_settings, listener, PORT
+from src.packet_processing.dictionnaries import valid_ip_address
+from src.packet_processing.variables import dictionnary_settings, listener, PORT
 
 
 class UDPRedirectWindow(Toplevel):

@@ -1,15 +1,15 @@
 
 import datetime
-import src.Session as Session
-import src.Player as Player
+import src.packet_processing.Session as Session
+import src.packet_processing.Player as Player
 import json
 import sys
 from pathlib import Path
 
 current_file = Path(__file__).resolve().parent
 
-settings_path = current_file.parent / "settings.txt"
-tracks_folder = current_file.parent /  "tracks"
+settings_path = current_file.parent.parent / "settings.txt"
+tracks_folder = current_file.parent.parent /  "tracks"
 
 def format_minutes(millis):
     texte = str(datetime.timedelta(seconds=millis))

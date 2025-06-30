@@ -1,5 +1,5 @@
-from src.dictionnaries import track_dictionary, color_flag_dict, teams_color_dictionary
-from src.variables import *
+from src.packet_processing.dictionnaries import track_dictionary, color_flag_dict, teams_color_dictionary
+from src.packet_processing.variables import *
 
 def create_map(map_canvas):
     cmi = 1

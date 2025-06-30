@@ -2,8 +2,10 @@ import time
 
 from PyQt5.QtWidgets import QListWidget
 
-from src.dictionnaries import *
-from src.variables import format_milliseconds
+import src
+from src.packet_processing.dictionnaries import *
+from src.packet_processing.variables import format_milliseconds
+from src.packet_processing.variables import *
 
 
 def update_motion(packet, *args):  # Packet 0
@@ -13,14 +15,13 @@ def update_motion(packet, *args):  # Packet 0
 
 
 def update_session(packet):  # Packet 1
-    global REDRAW_MAP
     session.trackTemperature = packet.m_weather_forecast_samples[0].m_track_temperature
     session.airTemperature = packet.m_weather_forecast_samples[0].m_air_temperature
     session.nbLaps = packet.m_total_laps
     session.time_left = packet.m_session_time_left
     if session.track != packet.m_track_id or session.Session != packet.m_session_type: # Track or session has changed
         session.track = packet.m_track_id
-        REDRAW_MAP = True
+        src.packet_processing.variables.REDRAW_MAP = True
     session.Session = packet.m_session_type
     session.marshalZones = packet.m_marshal_zones  # Array[21]
     session.marshalZones[0].m_zone_start = session.marshalZones[0].m_zone_start - 1
@@ -52,6 +53,7 @@ def update_lap_data(packet):  # Packet 2
         joueur.currentLapTime = element.m_current_lap_time_in_ms
         joueur.gap_to_leader=element.m_deltaToCarInFrontMSPart
         joueur.currentLapInvalid = element.m_current_lap_invalid
+        joueur.resultStatus = element.m_result_status
 
         if element.m_sector1_time_in_ms == 0 and joueur.currentSectors[0] != 0:  # On attaque un nouveau tour
             joueur.lastLapSectors = joueur.currentSectors[:]
@@ -96,6 +98,10 @@ def update_event(packet, qlist : QListWidget):  # Packet 3
 
 
 def update_participants(packet):  # Packet 4
+    if session.nb_players != packet.m_num_active_cars:
+        src.packet_processing.variables.REDRAW_MAP = True
+        session.nb_players = packet.m_num_active_cars
+
     for index in range(22):
         element = packet.m_participants[index]
         joueur = PLAYERS_LIST[index]
@@ -103,11 +109,14 @@ def update_participants(packet):  # Packet 4
         joueur.teamId = element.m_team_id
         joueur.aiControlled = element.m_ai_controlled
         joueur.yourTelemetry = element.m_your_telemetry
+        if joueur.networkId != element.m_network_id:
+            joueur.networkId = element.m_network_id
+            src.packet_processing.variables.REDRAW_MAP = True
         try:
             joueur.name = element.m_name.decode("utf-8")
         except:
             joueur.name = element.m_name
-        session.nb_players = packet.m_num_active_cars
+
         if joueur.name in ['Pilote', 'Driver']: # More translations appreciated
             joueur.name = teams_name_dictionary[joueur.teamId] + "#" + str(joueur.raceNumber)
 

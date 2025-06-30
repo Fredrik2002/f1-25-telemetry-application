@@ -1,6 +1,6 @@
-from ttkbootstrap import Toplevel, LEFT, Entry, IntVar, Label
-from tkinter import Message, Checkbutton, Button
-from src.variables import *
+from ttkbootstrap import Toplevel, Entry, Label
+from tkinter import Message, Button
+from src.packet_processing.variables import *
 
 import json
 

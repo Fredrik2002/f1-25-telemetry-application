@@ -2,8 +2,9 @@ from PyQt5.QtCore import QPointF, Qt, QRectF
 from PyQt5.QtGui import QFont, QPainter, QPen, QPolygonF
 from PyQt5.QtWidgets import QWidget
 
-from src.dictionnaries import color_flag_dict, track_dictionary, teams_color_dictionary
-from src.variables import session, PLAYERS_LIST, tracks_folder
+from src.packet_processing.dictionnaries import color_flag_dict, track_dictionary, teams_color_dictionary
+from src.packet_processing.variables import session, PLAYERS_LIST, tracks_folder
+import src
 
 
 class Canvas(QWidget):
@@ -20,24 +21,24 @@ class Canvas(QWidget):
 
 
     def paintEvent(self, event):
-        global REDRAW_MAP
         painter = QPainter(self)
         painter.setFont(Canvas.FONT)
-        if REDRAW_MAP:
+        if src.packet_processing.variables.REDRAW_MAP:
             self.create_map(painter)
             self.draw_circles(painter)
-            REDRAW_MAP = False
+            src.packet_processing.variables.REDRAW_MAP = False
         else:
             for index, polygon in enumerate(session.segments):
                 painter.setPen(QPen(color_flag_dict[session.marshalZones[index].m_zone_flag]))
                 painter.drawPolyline(polygon)
             for player in PLAYERS_LIST:
-                x_map = int(player.worldPositionX / self.coeff + self.offset_x - Canvas.RADIUS)
-                z_map = int(player.worldPositionZ / self.coeff + self.offset_z - Canvas.RADIUS)
-                player.oval.moveTo(x_map, z_map)
-                painter.setPen(player.qpen)
-                painter.drawText(x_map+20, z_map+20, player.name)
-                painter.drawEllipse(player.oval)
+                if player.resultStatus < 4 and player.networkId != 255:
+                    x_map = int(player.worldPositionX / self.coeff + self.offset_x - Canvas.RADIUS)
+                    z_map = int(player.worldPositionZ / self.coeff + self.offset_z - Canvas.RADIUS)
+                    player.oval.moveTo(x_map, z_map)
+                    painter.setPen(player.qpen)
+                    painter.drawText(x_map+20, z_map+20, player.name)
+                    painter.drawEllipse(player.oval)
 
 
     def update_data(self, a, b):
@@ -98,10 +99,11 @@ class Canvas(QWidget):
 
     def draw_circles(self, painter):
         for player in PLAYERS_LIST:
-            player.oval = QRectF(player.worldPositionX/self.coeff + self.offset_x - Canvas.RADIUS,
-                                 player.worldPositionZ/self.coeff + self.offset_z - Canvas.RADIUS,
-                                 2*Canvas.RADIUS, 2*Canvas.RADIUS)
-            player.qpen = QPen(teams_color_dictionary[player.teamId], 2*Canvas.RADIUS)
-            painter.setPen(player.qpen)
-            painter.drawEllipse(player.oval)
+            if player.resultStatus < 4 and player.networkId != 255:
+                player.oval = QRectF(player.worldPositionX/self.coeff + self.offset_x - Canvas.RADIUS,
+                                     player.worldPositionZ/self.coeff + self.offset_z - Canvas.RADIUS,
+                                     2*Canvas.RADIUS, 2*Canvas.RADIUS)
+                player.qpen = QPen(teams_color_dictionary[player.teamId], 2*Canvas.RADIUS)
+                painter.setPen(player.qpen)
+                painter.drawEllipse(player.oval)
 

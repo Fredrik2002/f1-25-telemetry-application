@@ -1,7 +1,7 @@
 from PyQt5.QtCore import QRectF
 from PyQt5.QtGui import QPen
 
-from src.dictionnaries import *
+from src.packet_processing.dictionnaries import *
 import src
 
 
@@ -56,6 +56,8 @@ class Player:
         self.speed_trap = 0
         self.gap_to_leader = 0
         self.currentLapInvalid = 1
+        self.resultStatus = 0
+        self.networkId = 0
 
     def __str__(self):
         return self.name + str(self.position)
@@ -84,7 +86,7 @@ class Player:
         return f"{self.frontLeftWingDamage}-{self.frontRightWingDamage}"
 
     def show_fuel(self):
-        if src.variables.session.Session in [15, 16, 17]:
+        if src.packet_processing.variables.session.Session in [15, 16, 17]:
             if self.fuelRemainingLaps > 0:
                 return "+" + '%.2f'% self.fuelRemainingLaps + " Laps"
         return '%.2f'% self.fuelRemainingLaps + " Laps"
@@ -112,9 +114,9 @@ class Player:
              self.rearWingDamage, self.floorDamage, self.diffuserDamage, self.sidepodDamage]
         elif name == "Laps":
             return [self.position, self.name, tyres_dictionnary[self.tyres],
-                    f"{src.variables.format_milliseconds(self.currentLapTime)} [{', '.join('%.3f'%truc for truc in self.currentSectors)}]",
-                    f"{src.variables.format_milliseconds(self.lastLapTime)} [{', '.join('%.3f'%truc for truc in self.lastLapSectors)}]",
-                    f"{src.variables.format_milliseconds(self.fastestLapTime)} [{', '.join('%.3f' % truc for truc in self.bestLapSectors)}]",
+                    f"{src.packet_processing.variables.format_milliseconds(self.currentLapTime)} [{', '.join('%.3f'%truc for truc in self.currentSectors)}]",
+                    f"{src.packet_processing.variables.format_milliseconds(self.lastLapTime)} [{', '.join('%.3f'%truc for truc in self.lastLapSectors)}]",
+                    f"{src.packet_processing.variables.format_milliseconds(self.fastestLapTime)} [{', '.join('%.3f' % truc for truc in self.bestLapSectors)}]",
                     ]
         elif name == "Temperatures":
             return [self.position, self.name, tyres_dictionnary[self.tyres],

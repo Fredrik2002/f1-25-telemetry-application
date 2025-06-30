@@ -5,11 +5,12 @@ from PyQt5.QtWidgets import (
     QTabBar
 )
 
-from src.packet_management import *
+from src.packet_processing.packet_management import *
 from src.windows.Canvas import Canvas
 from src.windows.SocketThread import SocketThread
 from src.windows.myTableModel import MyTableModel, MyTableModelWeatherForecast, MyTableModelPacketReception
-from src.variables import PLAYERS_LIST, COLUMN_SIZE_DICTIONARY, session
+from src.packet_processing.variables import PLAYERS_LIST, COLUMN_SIZE_DICTIONARY, session
+import src
 
 
 class FixedSizeTabBar(QTabBar):
@@ -226,8 +227,9 @@ class MainWindow(QMainWindow):
 
     def resizeEvent(self, event):
         self.setup_table_columns()
-        self.map_canvas.redraw_map = True
+        src.packet_processing.variables.REDRAW_MAP = True
         super().resizeEvent(event)
+        self.map_canvas.update()
 
 
 

@@ -1,4 +1,4 @@
-from src.dictionnaries import session_dictionary, track_dictionary, weather_dictionary, color_flag_dict
+from src.packet_processing.dictionnaries import session_dictionary, track_dictionary, weather_dictionary, color_flag_dict
 from src.parsers.parser2025 import WeatherForecastSample
 import src
 
@@ -68,9 +68,9 @@ class Session:
             string = f"Session : {session_dictionary[self.Session]}, Lap : {self.currentLap}/{self.nbLaps}, " \
                         f"Air : {self.airTemperature}°C / Track : {self.trackTemperature}°C"
         elif self.Session in [5, 6, 7, 8, 9]:
-            string = f" Qualy : {src.variables.format_minutes(self.time_left)}"
+            string = f" Qualy : {src.packet_processing.variables.format_minutes(self.time_left)}"
         else:
-            string = f" FP : {src.variables.format_minutes(self.time_left)}"
+            string = f" FP : {src.packet_processing.variables.format_minutes(self.time_left)}"
         return string
 
     def update_marshal_zones(self, map_canvas):
