@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QThread, pyqtSignal
+from PySide6.QtCore import QThread, Signal
 
 from src.parsers import parser2025
 from src.parsers.parser2025 import PacketHeader, Packet
@@ -6,7 +6,7 @@ from src.packet_processing.variables import PORT, dictionnary_settings
 
 
 class SocketThread(QThread):
-    data_received = pyqtSignal(PacketHeader, Packet)
+    data_received = Signal(PacketHeader, Packet)
 
     def __init__(self):
         super().__init__()

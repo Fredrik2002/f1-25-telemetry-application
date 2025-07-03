@@ -1,5 +1,5 @@
-from PyQt5.QtCore import QRectF
-from PyQt5.QtGui import QPen
+from PySide6.QtCore import QRectF
+from PySide6.QtGui import QPen
 
 from src.packet_processing.dictionnaries import *
 import src

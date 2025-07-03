@@ -1,6 +1,6 @@
-from PyQt5.QtCore import QPointF, Qt, QRectF
-from PyQt5.QtGui import QFont, QPainter, QPen, QPolygonF
-from PyQt5.QtWidgets import QWidget
+from PySide6.QtCore import QPointF, Qt, QRectF
+from PySide6.QtGui import QFont, QPainter, QPen, QPolygonF
+from PySide6.QtWidgets import QWidget
 
 from src.packet_processing.dictionnaries import color_flag_dict, track_dictionary, teams_color_dictionary
 from src.packet_processing.variables import session, PLAYERS_LIST, tracks_folder

@@ -1,4 +1,4 @@
-from PyQt5.QtGui import QColor
+from PySide6.QtGui import QColor
 
 
 def rgbtohex(r,g,b):

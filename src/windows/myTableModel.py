@@ -1,5 +1,5 @@
-from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex
-from PyQt5.QtGui import QFont
+from PySide6.QtCore import QAbstractTableModel, QModelIndex, Qt
+from PySide6.QtGui import QColor, QFont
 
 from src.packet_processing.Player import Player
 from src.packet_processing.packet_management import *

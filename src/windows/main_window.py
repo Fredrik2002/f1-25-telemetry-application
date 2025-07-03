@@ -1,6 +1,6 @@
-from PyQt5.QtCore import QSize, QAbstractTableModel
-from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import (
+from PySide6.QtCore import QSize, QAbstractTableModel
+from PySide6.QtGui import QFont
+from PySide6.QtWidgets import (
     QMainWindow, QTableView, QVBoxLayout, QWidget, QTabWidget, QHBoxLayout, QLabel, QAbstractItemView,
     QTabBar
 )
@@ -111,7 +111,7 @@ class MainWindow(QMainWindow):
         h_layout = QHBoxLayout()
         self.title_label = QLabel()
         font = QFont()
-        font.setWeight(18)
+        font.setWeight(QFont.Weight(18))
         self.title_label.setFont(font)
 
         h_layout.addWidget(self.title_label)

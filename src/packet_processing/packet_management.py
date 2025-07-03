@@ -1,6 +1,6 @@
 import time
 
-from PyQt5.QtWidgets import QListWidget
+from PySide6.QtWidgets import QListWidget
 
 import src
 from src.packet_processing.dictionnaries import *
