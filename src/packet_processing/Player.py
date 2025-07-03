@@ -79,6 +79,11 @@ class Player:
         self.currentSectors = [0] * 3
         self.fastestLapTime = 0
 
+
+    def show_tyres_list_damage(self, tyres_list):
+        return [(tyres_list[i], src.packet_processing.variables.interpolate_color_damage(tyres_list[i])) for i in
+                [2, 3, 0, 1]]
+
     def show_tyres_list(self, tyres_list):
         return f"{tyres_list[2]} {tyres_list[3]} \n{tyres_list[0]} {tyres_list[1]}"
 
@@ -109,8 +114,8 @@ class Player:
                     self.gap_to_leader, str(self.ERS_pourcentage)+'%', ERS_dictionary[self.ERS_mode], self.warnings,
                     self.raceNumber, self.show_drs(), pit_dictionary[self.pit]]
         elif name == "Damage":
-            return [self.position, self.name, tyres_dictionnary[self.tyres], self.show_tyres_list(self.tyre_wear),
-                    self.show_tyres_list(self.tyre_blisters), self.show_front_wing_damage(),
+            return [self.position, self.name, tyres_dictionnary[self.tyres], self.show_tyres_list_damage(self.tyre_wear),
+                    self.show_tyres_list_damage(self.tyre_blisters), self.show_front_wing_damage(),
              self.rearWingDamage, self.floorDamage, self.diffuserDamage, self.sidepodDamage]
         elif name == "Laps":
             return [self.position, self.name, tyres_dictionnary[self.tyres],

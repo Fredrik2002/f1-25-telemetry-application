@@ -8,7 +8,8 @@ from PySide6.QtWidgets import (
 from src.packet_processing.packet_management import *
 from src.windows.Canvas import Canvas
 from src.windows.SocketThread import SocketThread
-from src.windows.myTableModel import MyTableModel, MyTableModelWeatherForecast, MyTableModelPacketReception
+from src.windows.myTableModel import MyTableModel, MyTableModelWeatherForecast, MyTableModelPacketReception, \
+    MultiTextDelegate
 from src.packet_processing.variables import PLAYERS_LIST, COLUMN_SIZE_DICTIONARY, session
 import src
 
@@ -35,7 +36,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Telemetry Application")
-        self.resize(1440, 800)
+        self.resize(1080, 720)
 
         self.socketThread = SocketThread()
         self.socketThread.data_received.connect(self.update_table)
@@ -150,6 +151,10 @@ class MainWindow(QMainWindow):
         self.tables[name] = table
         self.models[name] = MyTableModel(data=data,
                               header=header)
+
+        for i in range(len(header)):
+            if header[i] in ["Tyres\nBlister", "Tyres\nWear"]:
+                table.setItemDelegateForColumn(i, MultiTextDelegate(table))
 
         table.setModel(self.models[name])
         table.verticalHeader().setVisible(False)

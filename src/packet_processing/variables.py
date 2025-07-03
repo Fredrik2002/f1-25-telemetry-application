@@ -1,5 +1,8 @@
 
 import datetime
+
+from PySide6.QtGui import QColor
+
 import src.packet_processing.Session as Session
 import src.packet_processing.Player as Player
 import json
@@ -26,6 +29,27 @@ def format_milliseconds(ms):
         return f"{minutes}:{seconds:02d}.{milliseconds:03d}"
     else:
         return f"{seconds:02d}.{milliseconds:03d}"
+
+def interpolate_color_damage(percent):
+    start_color = (0, 200, 0) # 0% -> Green
+    middle_color = (207, 163, 0) # 50% -> Yellow
+    end_color = (255, 0, 0) # 100% -> Red
+
+    return QColor(*interpolate_color(percent, start_color, end_color, middle_color))
+
+
+def interpolate_color(percent, color_start=(0, 200, 0), color_end=(255, 0, 0), color_middle=(207,163,0)):
+    percent = float(percent) / 100
+    if percent < 0.5:
+        r = int(color_start[0] + (color_middle[0] - color_start[0]) * 2*percent)
+        g = int(color_start[1] + (color_middle[1] - color_start[1]) * 2*percent)
+        b = int(color_start[2] + (color_middle[2] - color_start[2]) * 2*percent)
+    else:
+        r = int(color_middle[0] + (color_end[0] - color_middle[0]) * 2*(percent-0.5))
+        g = int(color_middle[1] + (color_end[1] - color_middle[1]) * 2*(percent-0.5))
+        b = int(color_middle[2] + (color_end[2] - color_middle[2]) * 2*(percent-0.5))
+
+    return (r, g, b)
 
 
 with open(settings_path, "r") as f:

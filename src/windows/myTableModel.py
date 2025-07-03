@@ -1,5 +1,6 @@
-from PySide6.QtCore import QAbstractTableModel, QModelIndex, Qt
+from PySide6.QtCore import QAbstractTableModel, QModelIndex, Qt, QRect
 from PySide6.QtGui import QColor, QFont
+from PySide6.QtWidgets import QStyledItemDelegate
 
 from src.packet_processing.Player import Player
 from src.packet_processing.packet_management import *
@@ -29,6 +30,8 @@ class MyTableModel(QAbstractTableModel):
         if role == Qt.DisplayRole:
             return self._data[index.row()][index.column()]
         if role == Qt.ForegroundRole:
+            if index.column() in [0, 1]:
+                return QColor(teams_color_dictionary[self.sorted_players_list[index.row()].teamId])
             if index.column() == 2:  # Tyres column : they have their own color
                 return QColor(tyres_color_dictionnary[self._data[index.row()][index.column()]])
             elif self._header[index.column()] == "DRS":
@@ -42,7 +45,8 @@ class MyTableModel(QAbstractTableModel):
             elif self._header[index.column()] == "PIT":
                 return white
             else:
-                return QColor(teams_color_dictionary[self.sorted_players_list[index.row()].teamId])
+                return white
+
 
 
         if role == Qt.FontRole:
@@ -174,3 +178,33 @@ class MyTableModelPacketReception(QAbstractTableModel):
         """
         self._data = data
         self.layoutChanged.emit()
+
+
+class MultiTextDelegate(QStyledItemDelegate):
+    def paint(self, painter, option, index):
+        painter.save()
+
+        # Expects: list of tuples like [("A", QColor("red")), ("B", QColor("green")), ...]
+        data = index.data()
+
+        rect = option.rect
+
+        font = QFont("Segoe UI Emoji", 12)
+        painter.setFont(font)
+
+        w = rect.width() // 2
+        h = rect.height() // 2
+
+        positions = [
+            QRect(rect.left(), rect.top(), w, h),  # haut gauche
+            QRect(rect.left() + w, rect.top(), w, h),  # haut droit
+            QRect(rect.left(), rect.top() + h, w, h),  # bas gauche
+            QRect(rect.left() + w, rect.top() + h, w, h)  # bas droit
+        ]
+
+        for (text, color), pos in zip(data, positions):
+            painter.setPen(color)
+            painter.drawText(pos, Qt.AlignmentFlag.AlignCenter, text)
+
+
+        painter.restore()
