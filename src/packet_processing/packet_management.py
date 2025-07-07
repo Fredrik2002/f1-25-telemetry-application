@@ -54,6 +54,7 @@ def update_lap_data(packet):  # Packet 2
         joueur.gap_to_leader=element.m_deltaToCarInFrontMSPart
         joueur.currentLapInvalid = element.m_current_lap_invalid
         joueur.resultStatus = element.m_result_status
+        joueur.lapDistance = element.m_lap_distance
 
         if element.m_sector1_time_in_ms == 0 and joueur.currentSectors[0] != 0:  # On attaque un nouveau tour
             joueur.lastLapSectors = joueur.currentSectors[:]

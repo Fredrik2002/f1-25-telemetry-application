@@ -19,7 +19,7 @@ class Session:
         self.idxBestLapTime = -1
         self.fastestLapTime = 5000
         self.safetyCarStatus = 0
-        self.trackLength = 0
+        self.trackLength = 1
         self.weatherList: list[WeatherForecastSample] = []
         self.nb_weatherForecastSamples = 0
         self.weatherForecastAccuracy = 0

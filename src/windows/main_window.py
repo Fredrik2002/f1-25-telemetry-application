@@ -62,7 +62,7 @@ class MainWindow(QMainWindow):
 
         self.create_tab(["Position", "Driver", "Tyres", "Tyres\nAge", "Gap\n(Leader)",
                          "ERS", "ERS Mode", "Warnings", "Race\nNumber", "DRS", "PIT"], "Main")
-        self.create_tab(["Position", "Driver", "Tyres", "Tyres\nWear",
+        self.create_tab(["Position", "Driver", "Tyres", "Average\nTyre Wear/Lap", "Tyres\nWear",
                          "Tyres\nBlister", "Front Wing\nDamage",
                   "Rear Wing\nDamage", "Floor\nDamage", "Diffuser\nDamage", "Sidepod\nDamage"], "Damage")
         self.create_tab(["Position", "Driver", "Tyres", "Current Lap", "Last Lap", "Fastest Lap"], "Laps")
