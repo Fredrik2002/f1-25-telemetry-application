@@ -1,6 +1,6 @@
 from PySide6.QtCore import QPointF, Qt, QRectF
 from PySide6.QtGui import QFont, QPainter, QPen, QPolygonF
-from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QWidget, QVBoxLayout
 
 from src.packet_processing.dictionnaries import color_flag_dict, track_dictionary, teams_color_dictionary
 from src.packet_processing.variables import session, PLAYERS_LIST, tracks_folder
@@ -12,12 +12,14 @@ class Canvas(QWidget):
     RADIUS = 3
     FONT = QFont("Arial", 12)
 
-    def __init__(self):
+    def __init__(self, parent):
         super().__init__()
         # Those values are automatically calculated in the create_map function according to the canvas size
         self.coeff = None
         self.offset_x = None
         self.offset_x = None
+
+        self.create_map_tab(parent)
 
 
     def paintEvent(self, event):
@@ -39,10 +41,6 @@ class Canvas(QWidget):
                     painter.setPen(player.qpen)
                     painter.drawText(x_map+20, z_map+20, player.name)
                     painter.drawEllipse(player.oval)
-
-
-    def update_data(self, a, b):
-        self.update()
 
 
     def create_map(self, painter):
@@ -106,4 +104,12 @@ class Canvas(QWidget):
                 player.qpen = QPen(teams_color_dictionary[player.teamId], 2*Canvas.RADIUS)
                 painter.setPen(player.qpen)
                 painter.drawEllipse(player.oval)
+
+    def create_map_tab(self, parent):
+        tab = QWidget()
+        layout = QVBoxLayout()
+
+        layout.addWidget(self)
+        tab.setLayout(layout)
+        parent.tabs.addTab(tab, "Map")
 

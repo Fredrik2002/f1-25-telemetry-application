@@ -165,6 +165,13 @@ def update_car_damage(packet):  # Packet 10
         joueur.diffuserDamage = element.m_diffuser_damage
         joueur.sidepodDamage = element.m_sidepod_damage
 
+def update_motion_extended(packet):  # Packet 13
+    #print(list(packet.get_value("m_wheelVertForce")))
+    #print(packet.get_value("m_front_aero_height"), packet.get_value("m_rear_aero_height"))
+    return
+
+    print()
+
 def nothing(packet):# Packet 8, 9, 11, 12, 13
     pass
 

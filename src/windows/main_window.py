@@ -6,10 +6,18 @@ from PySide6.QtWidgets import (
 )
 
 from src.packet_processing.packet_management import *
-from src.windows.Canvas import Canvas
+from src.table_models.DamageTableModel import DamageTableModel
+from src.table_models.ERSAndFuelTableMable import ERSAndFuelTableModel
+from src.table_models.LapTableModel import LapTableModel
+
+from src.table_models.MainTableModel import MainTableModel
+from src.table_models.PacketReceptionTableModel import PacketReceptionTableModel
+from src.table_models.TemperatureTableModel import TemperatureTableModel
+from src.table_models.WeatherForecastTableModel import WeatherForecastTableModel
+from src.table_models.RaceDirection import RaceDirection
+
+from src.table_models.Canvas import Canvas
 from src.windows.SocketThread import SocketThread
-from src.windows.myTableModel import MyTableModel, MyTableModelWeatherForecast, MyTableModelPacketReception, \
-    MultiTextDelegate
 from src.packet_processing.variables import PLAYERS_LIST, COLUMN_SIZE_DICTIONARY, session
 import src
 
@@ -46,7 +54,7 @@ class MainWindow(QMainWindow):
         self.map_canvas = None
         self.weather_table = None
         self.label_weather_accuracy = None
-        self.race_direction_list = None
+
 
         self.tabs = QTabWidget()
         self.tabs.currentChanged.connect(self.tabChanged)
@@ -57,47 +65,61 @@ class MainWindow(QMainWindow):
         self.models : dict[str, QAbstractTableModel] = {}
         self.tables : dict[str, QTableView] = {}
 
-        self.packet_reception_dict = {i: 0 for i in range(16)}
+        self.packet_reception_dict = [0 for _ in range(16)]
         self.last_update = 0
 
-        self.create_tab(["Position", "Driver", "Tyres", "Tyres\nAge", "Gap\n(Leader)",
-                         "ERS", "ERS Mode", "Warnings", "Race\nNumber", "DRS", "PIT"], "Main")
-        self.create_tab(["Position", "Driver", "Tyres", "Average\nTyre Wear/Lap", "Tyres\nWear",
-                         "Tyres\nBlister", "Front Wing\nDamage",
-                  "Rear Wing\nDamage", "Floor\nDamage", "Diffuser\nDamage", "Sidepod\nDamage"], "Damage")
-        self.create_tab(["Position", "Driver", "Tyres", "Current Lap", "Last Lap", "Fastest Lap"], "Laps")
-        self.create_tab(["Position", "Driver", "Tyres", "Tyres Surface\nTemperatures",
-                         "Tyres Inner\nTemperatures"], "Temperatures")
-        self.create_tab(["Position", "Driver", "Tyres", "ERS", "ERS Mode", "Fuel", "Fuel Mix"],
-                        "ERS && Fuel")
-        self.create_map_tab()
-        self.create_weather_tab()
-        self.create_packet_reception_tab()
+        self.mainModel = MainTableModel(self)
+        self.damageModel = DamageTableModel(self)
+        self.lapModel = LapTableModel(self)
+        self.temperatureModel = TemperatureTableModel(self)
+        self.mapCanvas = Canvas(self)
+        self.ersAndFuelModel = ERSAndFuelTableModel(self)
+        self.weatherForecastModel = WeatherForecastTableModel(self)
+        self.packetReceptionTableModel = PacketReceptionTableModel(self)
+        self.raceDirectorModel = RaceDirection(self)
+
+        MainWindow.function_hashmap = [  # PacketId : (fonction, arguments)
+            lambda packet : update_motion(packet),                                   # 0 : PacketMotion
+            lambda packet : update_session(packet),                                  # 1 : PacketSession
+            lambda packet : update_lap_data(packet),                                 # 2 : PacketLapData
+            lambda packet : update_event(packet, self.raceDirectorModel),            # 3 : PacketEvent
+            lambda packet : update_participants(packet),                             # 4 : PacketParticipants
+            lambda packet : update_car_setups(packet),                               # 5 : PacketCarSetup
+            lambda packet : update_car_telemetry(packet),                            # 6 : PacketCarTelemetry
+            lambda packet : update_car_status(packet),                               # 7 : PacketCarStatus
+            lambda packet : None,                                                    # 8 : PacketFinalClassification
+            lambda packet : None,                                                    # 9 : PacketLobbyInfo
+            lambda packet : update_car_damage(packet),                               # 10 : PacketCarDamage
+            lambda packet : None,                                                    # 11 : PacketSessionHistory
+            lambda packet : None,                                                    # 12 : PacketTyreSetsData
+            lambda packet : update_motion_extended(packet),                          # 13 : PacketMotionExData
+            lambda packet : None,                                                    # 14 : PacketTimeTrialData
+            lambda packet : None                                                     # 15 : PacketLapPositions
+        ]
+
+        MainWindow.update_data_hashmap = [
+            lambda: self.mainModel.update_data(),
+            lambda: self.damageModel.update_data(),
+            lambda: self.lapModel.update_data(),
+            lambda: self.temperatureModel.update_data(),
+            lambda: self.mapCanvas.update(),
+            lambda: self.ersAndFuelModel.update_data(),
+            lambda: self.weatherForecastModel.update_data(),
+            lambda: None,
+            lambda: self.raceDirectorModel.viewport().update()
+        ]
+
+        container = QWidget()
+        container.setLayout(self.main_layout)
+        self.setCentralWidget(container)
+        return
+
         self.create_race_direction_tab()
 
         container = QWidget()
         container.setLayout(self.main_layout)
         self.setCentralWidget(container)
         self.setup_table_columns()
-
-        MainWindow.function_hashmap = {  # PacketId : (fonction, arguments)
-            0: (update_motion, ()),  # PacketMotion
-            1: (update_session, ()),  # PacketSession
-            2: (update_lap_data, ()),  # PacketLapData
-            3: (update_event, [self.race_direction_list]),  # PacketEvent
-            4: (update_participants, ()),  # PacketParticipants
-            5: (update_car_setups, ()),  # PacketCarSetup
-            6: (update_car_telemetry, ()),  # PacketCarTelemetry
-            7: (update_car_status, ()),  # PacketCarStatus
-            8: (nothing, ()),  # PacketFinalClassification
-            9: (nothing, ()),  # PacketLobbyInfo
-            10: (update_car_damage, ()),  # PacketCarDamage
-            11: (nothing, ()),  # PacketSessionHistory
-            12: (nothing, ()),
-            13: (nothing, ()),
-            14: (nothing, ()),
-            15: (nothing, ())
-        }
 
     def tabChanged(self):
         self.setup_table_columns()
@@ -119,10 +141,11 @@ class MainWindow(QMainWindow):
         self.main_layout.addLayout(h_layout)
 
     def update_table(self, header, packet):
-        func, args = MainWindow.function_hashmap[header.m_packet_id]
-        func(packet, *args)
-        active_tab_name = self.tabs.tabText(self.tabs.currentIndex())
-        sorted_players_list = sorted(PLAYERS_LIST)
+        MainWindow.function_hashmap[header.m_packet_id](packet)
+
+        index = self.tabs.currentIndex()
+        MainWindow.update_data_hashmap[index]()
+        return
         if active_tab_name not in ["Packet Reception", "Race Direction"]:
             self.models[active_tab_name].update_data(sorted_players_list, active_tab_name)
 
@@ -132,38 +155,10 @@ class MainWindow(QMainWindow):
 
         self.packet_reception_dict[header.m_packet_id] += 1
         if time.time() > self.last_update + 1:
-            data = [
-                [packetDictionnary[i], str(self.packet_reception_dict[i]) + "/s"]
-                for i in range(len(packetDictionnary))
-            ]
-            self.models["Packet Reception"].update_data(data)
-            self.packet_reception_dict = {i: 0 for i in range(16)}
+            self.packetReceptionTableModel.update_data(self.packet_reception_dict)
+            self.packet_reception_dict = [0 for _ in range(16)]
             self.last_update = time.time()
 
-
-    def create_tab(self, header, name):
-        data = [player.tab_list(name) for player in PLAYERS_LIST if player.position != 0]
-
-        tab = QWidget(self)
-        layout = QVBoxLayout()
-        table = QTableView()
-        table.setWordWrap(True)
-        self.tables[name] = table
-        self.models[name] = MyTableModel(data=data,
-                              header=header)
-
-        for i in range(len(header)):
-            if header[i] in ["Tyres\nBlister", "Tyres\nWear"]:
-                table.setItemDelegateForColumn(i, MultiTextDelegate(table))
-
-        table.setModel(self.models[name])
-        table.verticalHeader().setVisible(False)
-        layout.addWidget(table)
-        tab.setLayout(layout)
-        self.tabs.addTab(tab, name)
-        table.resizeRowsToContents()
-        table.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
-        table.setHorizontalScrollMode(QAbstractItemView.ScrollPerPixel)
 
     def create_map_tab(self):
         tab = QWidget()
@@ -175,25 +170,7 @@ class MainWindow(QMainWindow):
         tab.setLayout(layout)
         self.tabs.addTab(tab, "Map")
 
-    def create_weather_tab(self):
-        tab = QWidget(self)
-        layout = QVBoxLayout()
-        self.label_weather_accuracy = QLabel(f"Weather accuracy : {WeatherForecastAccuracy[session.weatherForecastAccuracy]}")
-        self.label_weather_accuracy.setFont(QFont("Segoe UI Emoji", 12))
-        table = QTableView()
-        table.setWordWrap(True)
-        self.tables["Weather Forecast"] = table
-        self.models["Weather Forecast"] = MyTableModelWeatherForecast()
 
-        table.setModel(self.models["Weather Forecast"])
-        table.verticalHeader().setVisible(False)
-        layout.addWidget(self.label_weather_accuracy)
-        layout.addWidget(table)
-        tab.setLayout(layout)
-        self.tabs.addTab(tab, "Weather Forecast")
-        table.resizeRowsToContents()
-        table.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
-        table.setHorizontalScrollMode(QAbstractItemView.ScrollPerPixel)
 
     def create_packet_reception_tab(self):
         data = [
@@ -206,7 +183,7 @@ class MainWindow(QMainWindow):
         table = QTableView()
         table.setWordWrap(True)
         self.tables[name] = table
-        self.models[name] = MyTableModelPacketReception(data)
+        self.models[name] = PacketReceptionTableModel(data)
 
         table.setModel(self.models[name])
         table.verticalHeader().setVisible(False)

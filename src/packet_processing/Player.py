@@ -82,7 +82,7 @@ class Player:
 
 
     def show_tyres_list_damage(self, tyres_list):
-        return [(tyres_list[i], src.packet_processing.variables.interpolate_color_damage(tyres_list[i])) for i in
+        return [(str(tyres_list[i]), src.packet_processing.variables.interpolate_color_damage(tyres_list[i])) for i in
                 [2, 3, 0, 1]]
 
     def get_average_tyre_wear(self):
@@ -114,31 +114,31 @@ class Player:
         else:
             return ""
 
+    def main_tab(self):
+        return [self.position, self.name, tyres_dictionnary[self.tyres], self.tyresAgeLaps,
+                self.gap_to_leader, str(self.ERS_pourcentage) + '%', ERS_dictionary[self.ERS_mode], self.warnings,
+                self.raceNumber, self.show_drs(), pit_dictionary[self.pit]]
 
-    def tab_list(self, name):
-        if name == "Main":
-            return [self.position, self.name, tyres_dictionnary[self.tyres], self.tyresAgeLaps,
-                    self.gap_to_leader, str(self.ERS_pourcentage)+'%', ERS_dictionary[self.ERS_mode], self.warnings,
-                    self.raceNumber, self.show_drs(), pit_dictionary[self.pit]]
-        elif name == "Damage":
-            return [self.position, self.name, tyres_dictionnary[self.tyres],  self.get_average_tyre_wear(),
-                    self.show_tyres_list_damage(self.tyre_wear),
-            self.show_tyres_list_damage(self.tyre_blisters), self.show_front_wing_damage(),
-             self.rearWingDamage, self.floorDamage, self.diffuserDamage, self.sidepodDamage]
-        elif name == "Laps":
-            return [self.position, self.name, tyres_dictionnary[self.tyres],
-                    f"{src.packet_processing.variables.format_milliseconds(self.currentLapTime)} [{', '.join('%.3f'%truc for truc in self.currentSectors)}]",
-                    f"{src.packet_processing.variables.format_milliseconds(self.lastLapTime)} [{', '.join('%.3f'%truc for truc in self.lastLapSectors)}]",
-                    f"{src.packet_processing.variables.format_milliseconds(self.fastestLapTime)} [{', '.join('%.3f' % truc for truc in self.bestLapSectors)}]",
-                    ]
-        elif name == "Temperatures":
-            return [self.position, self.name, tyres_dictionnary[self.tyres],
-            self.show_tyres_list(self.tyres_temp_surface), self.show_tyres_list(self.tyres_temp_inner)]
-        elif name == "ERS && Fuel":
-            return [self.position, self.name, tyres_dictionnary[self.tyres], str(self.ERS_pourcentage)+'%',
-                    ERS_dictionary[self.ERS_mode], self.show_fuel(), fuel_dict[self.fuelMix]]
-        else:
-            raise ValueError(f"Unrecognized Tab Name : {name}")
+    def damage_tab(self):
+        return [self.position, self.name, tyres_dictionnary[self.tyres], self.get_average_tyre_wear(),
+                self.show_tyres_list_damage(self.tyre_wear),
+                self.show_tyres_list_damage(self.tyre_blisters), self.show_front_wing_damage(),
+                self.rearWingDamage, self.floorDamage, self.diffuserDamage, self.sidepodDamage]
+
+    def lap_tab(self):
+        return [self.position, self.name, tyres_dictionnary[self.tyres],
+                f"{src.packet_processing.variables.format_milliseconds(self.currentLapTime)} [{', '.join('%.3f' % truc for truc in self.currentSectors)}]",
+                f"{src.packet_processing.variables.format_milliseconds(self.lastLapTime)} [{', '.join('%.3f' % truc for truc in self.lastLapSectors)}]",
+                f"{src.packet_processing.variables.format_milliseconds(self.fastestLapTime)} [{', '.join('%.3f' % truc for truc in self.bestLapSectors)}]",
+                ]
+
+    def temperature_tab(self):
+        return [self.position, self.name, tyres_dictionnary[self.tyres],
+                self.show_tyres_list(self.tyres_temp_surface), self.show_tyres_list(self.tyres_temp_inner)]
+
+    def ers_and_fuel_tab(self):
+        return [self.position, self.name, tyres_dictionnary[self.tyres], str(self.ERS_pourcentage) + '%',
+                ERS_dictionary[self.ERS_mode], self.show_fuel(), fuel_dict[self.fuelMix]]
 
 
     def is_not_on_lap(self):
