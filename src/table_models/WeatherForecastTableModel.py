@@ -8,30 +8,22 @@ from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QTableView, QAbstrac
 
 from src.packet_processing.dictionnaries import WeatherForecastAccuracy
 from src.packet_processing.variables import session
+from src.table_models.GeneralTableModel import GeneralTableModel
 
 
-class WeatherForecastTableModel(QAbstractTableModel):
-    def __init__(self, parent):
-        super().__init__()
-        self._data = [session.show_weather_sample(i) for i in range(session.nb_weatherForecastSamples)]
-        self._header = ["Session", "Time\nOffset", "Rain %", "Weather", "Air\nTemperature", "Track\nTemperature"]
+class WeatherForecastTableModel(GeneralTableModel):
+    def __init__(self):
+        data = [session.show_weather_sample(i) for i in range(session.nb_weatherForecastSamples)]
+        header = ["Session", "Time\nOffset", "Rain %", "Weather", "Air\nTemperature", "Track\nTemperature"]
+        column_sizes = [15, 10, 8, 8, 8, 8]
+        super().__init__(header, data, column_sizes)
 
         self.label_weather_accuracy = QLabel(
             f"Weather accuracy : {WeatherForecastAccuracy[session.weatherForecastAccuracy]}")
-        self.label_weather_accuracy.setFont(QFont("Segoe UI Emoji", 12))
 
-        self.create_weather_tab(parent)
+        self.layout = QVBoxLayout()
 
-    def rowCount(self, parent=QModelIndex()):
-        return len(self._data)
-
-    def columnCount(self, parent=QModelIndex()):
-        return 6
-
-    def updateCell(self, row, column, value):
-        self._data[row][column] = value
-        index = self.index(row, column)
-        self.dataChanged.emit(index, index, [Qt.DisplayRole])
+        self.create_layout()
 
     def data(self, index, role=Qt.DisplayRole):
         if role == Qt.DisplayRole:
@@ -40,37 +32,23 @@ class WeatherForecastTableModel(QAbstractTableModel):
             font = QFont("Segoe UI Emoji", 12)
             return font
 
-    def flags(self, index):
-        return Qt.ItemIsEnabled
-
-    def headerData(self, section, orientation, role):
-        if role == Qt.DisplayRole:
-            if orientation == Qt.Horizontal:
-                return self._header[section]
-        if role == Qt.FontRole:
-            font = QFont()
-            font.setBold(True)
-            return font
-
-    def create_weather_tab(self, parent):
-        tab = QWidget(parent)
-        layout = QVBoxLayout()
+    def create_layout(self):
+        self.label_weather_accuracy.setFont(QFont("Segoe UI Emoji", 12))
 
         table = QTableView()
         table.setWordWrap(True)
 
         table.setModel(self)
         table.verticalHeader().setVisible(False)
-        layout.addWidget(self.label_weather_accuracy)
-        layout.addWidget(table)
-        tab.setLayout(layout)
-        parent.tabs.addTab(tab, "Weather Forecast")
 
         table.resizeRowsToContents()
         table.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
         table.setHorizontalScrollMode(QAbstractItemView.ScrollPerPixel)
 
-    def update_data(self):
+        self.layout.addWidget(self.label_weather_accuracy)
+        self.layout.addWidget(table)
+
+    def update(self):
         """
         sorted_players_list (list : Player) : List of Player sorted by position
         active_tab_name (str) : Gives the name of the current tab

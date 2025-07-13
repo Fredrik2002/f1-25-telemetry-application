@@ -23,6 +23,10 @@ border: 1px solid #444;
 background-color: #222;
 }
 
+QTabBar {
+     qproperty-drawBase: 0;
+}
+
 QTabBar::tab {
     height: 40px;
     background: #333;

@@ -1,8 +1,8 @@
 from PySide6.QtCore import QSize, QAbstractTableModel
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, Qt
 from PySide6.QtWidgets import (
     QMainWindow, QTableView, QVBoxLayout, QWidget, QTabWidget, QHBoxLayout, QLabel, QAbstractItemView,
-    QTabBar
+    QTabBar, QStackedWidget, QSizePolicy
 )
 
 from src.packet_processing.packet_management import *
@@ -51,32 +51,50 @@ class MainWindow(QMainWindow):
         self.socketThread.start()
 
         self.main_layout = QVBoxLayout()
-        self.map_canvas = None
-        self.weather_table = None
-        self.label_weather_accuracy = None
 
+        self.index = 0
 
-        self.tabs = QTabWidget()
-        self.tabs.currentChanged.connect(self.tabChanged)
-        self.tabs.setTabBar(FixedSizeTabBar())
-        self.create_title()
+        self.menu = QListWidget()
+        self.menu.addItems(["Main", "Damage", "Laps", "Temperatures", "Map", "ERS & Fuel",
+                            "Weather Forecast", "Packet Reception", "Race Director"])
+        self.menu.setCurrentRow(self.index)
 
-        self.main_layout.addWidget(self.tabs)
-        self.models : dict[str, QAbstractTableModel] = {}
-        self.tables : dict[str, QTableView] = {}
+        self.mainModel = MainTableModel()
+        self.damageModel = DamageTableModel()
+        self.lapModel = LapTableModel()
+        self.temperatureModel = TemperatureTableModel()
+        self.mapCanvas = Canvas()
+        self.ersAndFuelModel = ERSAndFuelTableModel()
+        self.weatherForecastModel = WeatherForecastTableModel()
+        self.packetReceptionTableModel = PacketReceptionTableModel(self)
+        self.raceDirectorModel = RaceDirection()
+
+        self.models = [
+            self.mainModel,
+            self.damageModel,
+            self.lapModel,
+            self.temperatureModel,
+            self.mapCanvas,
+            self.ersAndFuelModel,
+            self.weatherForecastModel,
+            self.packetReceptionTableModel,
+            self.raceDirectorModel
+        ]
+
+        self.stack = QStackedWidget()
+        self.menu.currentRowChanged.connect(self.on_row_changed)
+
+        self.title_label = QLabel()
+
+        self.create_layout()
 
         self.packet_reception_dict = [0 for _ in range(16)]
         self.last_update = 0
 
-        self.mainModel = MainTableModel(self)
-        self.damageModel = DamageTableModel(self)
-        self.lapModel = LapTableModel(self)
-        self.temperatureModel = TemperatureTableModel(self)
-        self.mapCanvas = Canvas(self)
-        self.ersAndFuelModel = ERSAndFuelTableModel(self)
-        self.weatherForecastModel = WeatherForecastTableModel(self)
-        self.packetReceptionTableModel = PacketReceptionTableModel(self)
-        self.raceDirectorModel = RaceDirection(self)
+        container = QWidget()
+        container.setLayout(self.main_layout)
+        self.setCentralWidget(container)
+
 
         MainWindow.function_hashmap = [  # PacketId : (fonction, arguments)
             lambda packet : update_motion(packet),                                   # 0 : PacketMotion
@@ -97,121 +115,60 @@ class MainWindow(QMainWindow):
             lambda packet : None                                                     # 15 : PacketLapPositions
         ]
 
-        MainWindow.update_data_hashmap = [
-            lambda: self.mainModel.update_data(),
-            lambda: self.damageModel.update_data(),
-            lambda: self.lapModel.update_data(),
-            lambda: self.temperatureModel.update_data(),
-            lambda: self.mapCanvas.update(),
-            lambda: self.ersAndFuelModel.update_data(),
-            lambda: self.weatherForecastModel.update_data(),
-            lambda: None,
-            lambda: self.raceDirectorModel.viewport().update()
-        ]
+    def closeEvent(self, event):
+        self.socketThread.stop()
+        self.close()
 
-        container = QWidget()
-        container.setLayout(self.main_layout)
-        self.setCentralWidget(container)
-        return
+    def create_layout(self):
+        self.title_label.setFont(QFont("Segoe UI Emoji", 12))
 
-        self.create_race_direction_tab()
+        self.menu.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.menu.setMaximumWidth(150)
+        self.menu.setFont(QFont("Segoe UI Emoji", 12))
 
-        container = QWidget()
-        container.setLayout(self.main_layout)
-        self.setCentralWidget(container)
-        self.setup_table_columns()
+        h_layout1 = QHBoxLayout()
+        h_layout2 = QHBoxLayout()
 
-    def tabChanged(self):
-        self.setup_table_columns()
+        self.stack.addWidget(self.mainModel.table)
+        self.stack.addWidget(self.damageModel.table)
+        self.stack.addWidget(self.lapModel.table)
+        self.stack.addWidget(self.temperatureModel.table)
+        self.stack.addWidget(self.mapCanvas)
+        self.stack.addWidget(self.ersAndFuelModel.table)
+        self.stack.addWidget(self.weatherForecastModel.table)
+        self.stack.addWidget(self.packetReceptionTableModel.table)
+        self.stack.addWidget(self.raceDirectorModel)
 
-    def setup_table_columns(self):
-        for name, table in self.tables.items():
-            width = table.viewport().width()
-            for i in range(self.models[name].columnCount()):
-                table.setColumnWidth(i, int(width/100*COLUMN_SIZE_DICTIONARY[name][i]))
+        h_layout1.addWidget(self.title_label)
+        h_layout2.addWidget(self.menu)
+        h_layout2.addWidget(self.stack)
 
-    def create_title(self):
-        h_layout = QHBoxLayout()
-        self.title_label = QLabel()
-        font = QFont()
-        font.setWeight(QFont.Weight(18))
-        self.title_label.setFont(font)
-
-        h_layout.addWidget(self.title_label)
-        self.main_layout.addLayout(h_layout)
+        self.main_layout.addLayout(h_layout1)
+        self.main_layout.addLayout(h_layout2)
 
     def update_table(self, header, packet):
         MainWindow.function_hashmap[header.m_packet_id](packet)
 
-        index = self.tabs.currentIndex()
-        MainWindow.update_data_hashmap[index]()
-        return
-        if active_tab_name not in ["Packet Reception", "Race Direction"]:
-            self.models[active_tab_name].update_data(sorted_players_list, active_tab_name)
+        self.models[self.index].update()
 
         if header.m_packet_id == 1:
             self.title_label.setText(session.title_display())
-            self.label_weather_accuracy.setText(f"Weather accuracy : {WeatherForecastAccuracy[session.weatherForecastAccuracy]}")
 
         self.packet_reception_dict[header.m_packet_id] += 1
         if time.time() > self.last_update + 1:
-            self.packetReceptionTableModel.update_data(self.packet_reception_dict)
+            self.packetReceptionTableModel.update_each_second()
             self.packet_reception_dict = [0 for _ in range(16)]
             self.last_update = time.time()
 
-
-    def create_map_tab(self):
-        tab = QWidget()
-        layout = QVBoxLayout()
-
-        self.map_canvas = Canvas()
-        self.models["Map"] = self.map_canvas
-        layout.addWidget(self.map_canvas)
-        tab.setLayout(layout)
-        self.tabs.addTab(tab, "Map")
-
-
-
-    def create_packet_reception_tab(self):
-        data = [
-            [packetDictionnary[i], str(self.packet_reception_dict[i]) + "/s"]
-            for i in range(len(packetDictionnary))
-        ]
-        name = "Packet Reception"
-        tab = QWidget(self)
-        layout = QVBoxLayout()
-        table = QTableView()
-        table.setWordWrap(True)
-        self.tables[name] = table
-        self.models[name] = PacketReceptionTableModel(data)
-
-        table.setModel(self.models[name])
-        table.verticalHeader().setVisible(False)
-        layout.addWidget(table)
-        tab.setLayout(layout)
-        self.tabs.addTab(tab,name)
-        table.resizeRowsToContents()
-        table.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
-        table.setHorizontalScrollMode(QAbstractItemView.ScrollPerPixel)
-
-    def create_race_direction_tab(self):
-        tab = QWidget(self)
-        layout = QVBoxLayout()
-        self.race_direction_list = QListWidget()
-        self.race_direction_list.setFont(QFont("Segoe UI Emoji", 12))
-
-        layout.addWidget(self.race_direction_list)
-        tab.setLayout(layout)
-        self.tabs.addTab(tab, "Race Direction")
-        self.race_direction_list.setWordWrap(True)
-        self.race_direction_list.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
-        self.race_direction_list.setHorizontalScrollMode(QAbstractItemView.ScrollPerPixel)
+    def on_row_changed(self, index):
+        self.stack.setCurrentIndex(index)
+        self.index = index
 
     def resizeEvent(self, event):
-        self.setup_table_columns()
         src.packet_processing.variables.REDRAW_MAP = True
         super().resizeEvent(event)
-        self.map_canvas.update()
+        self.models[self.index].update()
+
 
 
 

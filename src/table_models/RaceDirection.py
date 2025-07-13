@@ -3,18 +3,14 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QListWidget, QAbstractItemVi
 
 
 class RaceDirection(QListWidget):
-    def __init__(self, parent):
+    def __init__(self):
         super().__init__()
 
-        tab = QWidget(parent)
-        layout = QVBoxLayout()
-        layout.addWidget(self)
         self.setFont(QFont("Segoe UI Emoji", 12))
-
-        tab.setLayout(layout)
-
-        parent.tabs.addTab(tab, "Race Direction")
 
         self.setWordWrap(True)
         self.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
         self.setHorizontalScrollMode(QAbstractItemView.ScrollPerPixel)
+
+    def update(self):
+        self.viewport().update()

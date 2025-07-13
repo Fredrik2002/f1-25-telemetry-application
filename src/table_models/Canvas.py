@@ -12,14 +12,12 @@ class Canvas(QWidget):
     RADIUS = 3
     FONT = QFont("Arial", 12)
 
-    def __init__(self, parent):
+    def __init__(self):
         super().__init__()
         # Those values are automatically calculated in the create_map function according to the canvas size
         self.coeff = None
         self.offset_x = None
         self.offset_x = None
-
-        self.create_map_tab(parent)
 
 
     def paintEvent(self, event):
@@ -104,12 +102,4 @@ class Canvas(QWidget):
                 player.qpen = QPen(teams_color_dictionary[player.teamId], 2*Canvas.RADIUS)
                 painter.setPen(player.qpen)
                 painter.drawEllipse(player.oval)
-
-    def create_map_tab(self, parent):
-        tab = QWidget()
-        layout = QVBoxLayout()
-
-        layout.addWidget(self)
-        tab.setLayout(layout)
-        parent.tabs.addTab(tab, "Map")
 
