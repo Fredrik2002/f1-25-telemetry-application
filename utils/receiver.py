@@ -4,9 +4,6 @@ import threading
 import os
 import datetime
 
-from debugpy.common.timestamp import current
-from flask import redirect
-
 PORT = 20777
 string = ""
 
@@ -44,7 +41,7 @@ def main():
         try:
             packet = socket_recv.recv(2048)
             L.append(packet)
-            if redirect:
+            if REDIRECT:
                 socket_send.sendto(packet, (REDIRECT_ADDRESS, REDIRECT_PORT))
         except BlockingIOError:
             pass

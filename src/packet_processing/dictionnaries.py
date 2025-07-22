@@ -34,11 +34,11 @@ tyres_dictionnary = {
 }
 
 tyres_color_dictionnary = {
-    "S": "#FF0000",
-    "M": "#FFD700",
-    "H": "#FFFFFF",
-    "I": "#00FF00",
-    "W": "#0000FF"
+    "S": QColor("#FF0000"),
+    "M": QColor("#FFD700"),
+    "H": QColor("#FFFFFF"),
+    "I": QColor("#00FF00"),
+    "W": QColor("#0000FF")
 }
 
 track_dictionary = { #(track name, highNumber=Small on canvas, x_offset, y_offset)

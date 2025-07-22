@@ -74,6 +74,9 @@ Open the F1 Game :
 * Improving map appearance
 * Add race control panel
 * Gaps not working properly
+* DRS vert fonctionne pas
+* PIT fonctionne pas
+* Point not aligned with map
 
 Telemetry issues :
 * Check glitch on the grid where track_id is correctly set but marshals_zones are set to 0

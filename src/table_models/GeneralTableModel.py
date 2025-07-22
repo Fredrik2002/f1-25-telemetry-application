@@ -36,7 +36,7 @@ class GeneralTableModel(QAbstractTableModel):
             return self._data[index.row()][index.column()]
 
         if role == Qt.FontRole:
-            return QFont("Segoe UI Emoji", 12)
+            return main_font
 
 
     def setData(self, index, value, role=Qt.EditRole):

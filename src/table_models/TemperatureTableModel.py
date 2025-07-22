@@ -24,22 +24,24 @@ class TemperatureTableModel(GeneralTableModel):
         column_sizes = [8, 20, 8, 12, 12]
         super().__init__(header, data, column_sizes)
 
+        self.sorted_players_list : list[Player] = sorted(PLAYERS_LIST)
+
 
     def data(self, index, role=Qt.DisplayRole):
         if role == Qt.DisplayRole:
             return self._data[index.row()][index.column()]
         if role == Qt.ForegroundRole:
             if index.column() in [0, 1]:
-                return QColor(teams_color_dictionary[self.sorted_players_list[index.row()].teamId])
+                return teams_color_dictionary[self.sorted_players_list[index.row()].teamId]
             elif index.column() == 2:  # Tyres column : they have their own color
-                return QColor(tyres_color_dictionnary[self._data[index.row()][index.column()]])
+                return tyres_color_dictionnary[self._data[index.row()][index.column()]]
 
 
         if role == Qt.FontRole:
-            font = QFont("Segoe UI Emoji", 12)
-            if index.column() == 2:  # ← cellule spécifique
-                font.setBold(True)
-            return font
+            if index.column() == 2:
+                return main_font_bolded
+            return main_font
+
         if role == Qt.TextAlignmentRole:
             if index.column() == 0:
                 return Qt.AlignRight | Qt.AlignVCenter

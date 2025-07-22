@@ -25,13 +25,6 @@ class WeatherForecastTableModel(GeneralTableModel):
 
         self.create_layout()
 
-    def data(self, index, role=Qt.DisplayRole):
-        if role == Qt.DisplayRole:
-            return self._data[index.row()][index.column()]
-        if role == Qt.FontRole:
-            font = QFont("Segoe UI Emoji", 12)
-            return font
-
     def create_layout(self):
         self.label_weather_accuracy.setFont(QFont("Segoe UI Emoji", 12))
 

@@ -19,30 +19,32 @@ from src.table_models.utils import MultiTextDelegate
 class DamageTableModel(GeneralTableModel):
     def __init__(self):
         data = [player.damage_tab() for player in PLAYERS_LIST if player.position != 0]
-        header = ["Pos", "Driver", "", "Wear/\nLap", "Tyres\nWear",
+        header = ["Pos", "Driver", "", "Tyres\nAge", "Wear/\nLap", "Tyres\nWear",
                          "Tyres\nBlister", "FW\nDmg",
                   "RW\nDmg", "Floor\nDmg", "Diffuser\nDamage", "Sidepod\nDamage"]
-        column_sizes = [5, 20, 1, 10, 13, 13, 6, 6, 6, 10, 10]
+        column_sizes = [5, 20, 1, 6, 10, 13, 13, 6, 6, 6, 10, 10]
         super().__init__(header, data, column_sizes)
+
+        self.sorted_players_list: list[Player] = sorted(PLAYERS_LIST)
 
     def data(self, index, role=Qt.DisplayRole):
         if role == Qt.DisplayRole:
             return self._data[index.row()][index.column()]
         if role == Qt.ForegroundRole:
             if index.column() in [0, 1]:
-                return QColor(teams_color_dictionary[self.sorted_players_list[index.row()].teamId])
+                return teams_color_dictionary[self.sorted_players_list[index.row()].teamId]
             if index.column() == 2:  # Tyres column : they have their own color
-                return QColor(tyres_color_dictionnary[self._data[index.row()][index.column()]])
+                return tyres_color_dictionnary[self._data[index.row()][index.column()]]
 
         if role == Qt.FontRole:
-            font = QFont("Segoe UI Emoji", 12)
-            if index.column() == 2:  # ← cellule spécifique
-                font.setBold(True)
-            return font
+            if index.column() == 2:  # Tyres
+                return main_font_bolded
+            return main_font
+
         if role == Qt.TextAlignmentRole:
             if index.column() == 0:
                 return Qt.AlignRight | Qt.AlignVCenter
-            elif index.column() in [2,4,5]:
+            elif index.column() in [2,3,4,5]:
                 return Qt.AlignCenter
 
 

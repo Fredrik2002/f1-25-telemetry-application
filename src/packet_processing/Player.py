@@ -104,11 +104,8 @@ class Player:
         return '%.2f'% self.fuelRemainingLaps + " Laps"
 
     def show_drs(self):
-        if self.DRS_allowed == 1:
-            if self.drs == 0:
-                return "DRS_a"
-            else:
-                return "DRS"
+        if self.DRS_allowed or self.drs:
+            return "DRS"
         elif self.DRS_activation_distance > 0:
             return str(self.DRS_activation_distance) + "m"
         else:
@@ -120,8 +117,8 @@ class Player:
                 self.raceNumber, self.show_drs(), pit_dictionary[self.pit]]
 
     def damage_tab(self):
-        return [self.position, self.name, tyres_dictionnary[self.tyres], self.get_average_tyre_wear(),
-                self.show_tyres_list_damage(self.tyre_wear),
+        return [self.position, self.name, tyres_dictionnary[self.tyres], self.tyresAgeLaps,
+                self.get_average_tyre_wear(), self.show_tyres_list_damage(self.tyre_wear),
                 self.show_tyres_list_damage(self.tyre_blisters), self.show_front_wing_damage(),
                 self.rearWingDamage, self.floorDamage, self.diffuserDamage, self.sidepodDamage]
 

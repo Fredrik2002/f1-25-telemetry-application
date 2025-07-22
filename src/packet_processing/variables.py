@@ -1,7 +1,7 @@
 
 import datetime
 
-from PySide6.QtGui import QColor
+from PySide6.QtGui import QColor, QFont
 
 import src.packet_processing.Session as Session
 import src.packet_processing.Player as Player
@@ -81,3 +81,7 @@ COLUMN_SIZE_DICTIONARY = {
     "Weather Forecast": [15, 8, 10, 12, 12, 12],
     "Packet Reception" : [15, 10]
 }
+
+main_font = QFont("Segoe UI Emoji", 12)
+main_font_bolded = QFont("Segoe UI Emoji", 12)
+main_font_bolded.setBold(True)

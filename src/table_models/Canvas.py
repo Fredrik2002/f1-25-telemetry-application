@@ -17,7 +17,7 @@ class Canvas(QWidget):
         # Those values are automatically calculated in the create_map function according to the canvas size
         self.coeff = None
         self.offset_x = None
-        self.offset_x = None
+        self.offset_z = None
 
 
     def paintEvent(self, event):
