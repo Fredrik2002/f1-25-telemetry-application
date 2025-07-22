@@ -35,6 +35,8 @@ class MainTableModel(GeneralTableModel):
                 return teams_color_dictionary[self.sorted_players_list[index.row()].teamId]
             elif index.column() == 2:  # Tyres column : they have their own color
                 return tyres_color_dictionnary[self._data[index.row()][index.column()]]
+            elif index.column() == 5:
+                return QColor(interpolate_color_ERS(self.sorted_players_list[index.row()].ERS_pourcentage))
             elif index.column() == 9:  # DRS Column
                 if self.sorted_players_list[index.row()].drs:
                     return green

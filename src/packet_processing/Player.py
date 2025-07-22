@@ -54,7 +54,7 @@ class Player:
         self.aiControlled = -1
         self.hasRetired = False
         self.speed_trap = 0
-        self.gap_to_leader = 0
+        self.gap_to_car_ahead = 0
         self.currentLapInvalid = 1
         self.resultStatus = 0
         self.networkId = 0
@@ -80,6 +80,11 @@ class Player:
         self.currentSectors = [0] * 3
         self.fastestLapTime = 0
 
+    def show_gap(self):
+        if self.gap_to_car_ahead == 0:
+            return ""
+        else:
+            return "+" + '%.3f'% self.gap_to_car_ahead
 
     def show_tyres_list_damage(self, tyres_list):
         return [(str(tyres_list[i]), src.packet_processing.variables.interpolate_color_damage(tyres_list[i])) for i in
@@ -113,7 +118,7 @@ class Player:
 
     def main_tab(self):
         return [self.position, self.name, tyres_dictionnary[self.tyres], self.tyresAgeLaps,
-                self.gap_to_leader, str(self.ERS_pourcentage) + '%', ERS_dictionary[self.ERS_mode], self.warnings,
+                self.show_gap(), str(self.ERS_pourcentage) + '%', ERS_dictionary[self.ERS_mode], self.warnings,
                 self.raceNumber, self.show_drs(), pit_dictionary[self.pit]]
 
     def damage_tab(self):

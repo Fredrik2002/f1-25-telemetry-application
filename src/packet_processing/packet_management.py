@@ -51,7 +51,7 @@ def update_lap_data(packet):  # Packet 2
         joueur.warnings = element.m_corner_cutting_warnings
         joueur.speed_trap = round(element.m_speedTrapFastestSpeed, 2)
         joueur.currentLapTime = element.m_current_lap_time_in_ms
-        joueur.gap_to_leader=element.m_deltaToCarInFrontMSPart
+        joueur.gap_to_car_ahead = element.m_deltaToCarInFrontMSPart/1_000
         joueur.currentLapInvalid = element.m_current_lap_invalid
         joueur.resultStatus = element.m_result_status
         joueur.lapDistance = element.m_lap_distance

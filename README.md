@@ -74,8 +74,7 @@ Open the F1 Game :
 * Improving map appearance
 * Add race control panel
 * Gaps not working properly
-* DRS vert fonctionne pas
-* PIT fonctionne pas
+* PIT not working ?
 * Point not aligned with map
 
 Telemetry issues :

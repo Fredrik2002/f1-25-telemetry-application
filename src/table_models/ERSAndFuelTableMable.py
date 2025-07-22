@@ -20,7 +20,7 @@ class ERSAndFuelTableModel(GeneralTableModel):
     def __init__(self):
         data = [player.ers_and_fuel_tab() for player in PLAYERS_LIST if player.position != 0]
         header = ["Pos", "Driver", "", "ERS", "ERS Mode", "Fuel", "Fuel Mix"]
-        column_sizes = [4, 20, 1, 8, 15, 10, 10]
+        column_sizes = [4, 20, 1, 8, 15, 15, 10]
         super().__init__(header, data, column_sizes)
 
     def data(self, index, role=Qt.DisplayRole):
@@ -31,6 +31,8 @@ class ERSAndFuelTableModel(GeneralTableModel):
                 return teams_color_dictionary[self.sorted_players_list[index.row()].teamId]
             elif index.column() == 2:  # Tyres column : they have their own color
                 return tyres_color_dictionnary[self._data[index.row()][index.column()]]
+            elif index.column() == 3:  # ERS %
+                return QColor(interpolate_color_ERS(self.sorted_players_list[index.row()].ERS_pourcentage))
 
         if role == Qt.FontRole:
             if index.column() == 2:

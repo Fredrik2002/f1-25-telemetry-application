@@ -37,6 +37,13 @@ def interpolate_color_damage(percent):
 
     return QColor(*interpolate_color(percent, start_color, end_color, middle_color))
 
+def interpolate_color_ERS(percent):
+    start_color = (255, 0, 0) # 0% -> Red
+    middle_color = (149, 255, 84) # 50% -> Light Green
+    end_color = (0, 200, 0) # 100% -> Green
+
+    return QColor(*interpolate_color(percent, start_color, end_color, middle_color))
+
 
 def interpolate_color(percent, color_start=(0, 200, 0), color_end=(255, 0, 0), color_middle=(207,163,0)):
     percent = float(percent) / 100
