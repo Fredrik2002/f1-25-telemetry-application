@@ -30,6 +30,7 @@ class MainTableModel(GeneralTableModel):
     def data(self, index, role=Qt.DisplayRole):
         if role == Qt.DisplayRole:
             return self._data[index.row()][index.column()]
+
         if role == Qt.ForegroundRole:
             if index.column() in [0, 1]:
                 return teams_color_dictionary[self.sorted_players_list[index.row()].teamId]
@@ -62,4 +63,11 @@ class MainTableModel(GeneralTableModel):
         """
         self.sorted_players_list : list[Player] = sorted(PLAYERS_LIST)
         self._data = [player.main_tab() for player in self.sorted_players_list if player.position != 0]
-        self.layoutChanged.emit()
+
+        if self.nb_players != len(self._data):
+            self.nb_players = len(self._data)
+            self.layoutChanged.emit()
+        else:
+            top_left = self.index(0, 0)
+            bottom_right = self.index(self.rowCount() - 1, self.columnCount() - 1)
+            self.dataChanged.emit(top_left, bottom_right, [Qt.DisplayRole])

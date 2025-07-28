@@ -9,7 +9,7 @@ class Player:
     def __init__(self):
         self.position: int = 1
         self.tyre_wear = ["0.00", "0.00", "0.00", "0.00"]
-        self.tyre_blisters = [0,0,0,0]
+        self.tyre_blisters = ["0.00", "0.00", "0.00", "0.00"]
         self.tyres = 0
         self.warnings = 0
         self.ERS_mode = -1
@@ -84,7 +84,7 @@ class Player:
         if self.gap_to_car_ahead == 0:
             return ""
         else:
-            return "+" + '%.3f'% self.gap_to_car_ahead
+            return "+" + '%.3f'% self.gap_to_car_ahead + "s"
 
     def show_tyres_list_damage(self, tyres_list):
         return [(str(tyres_list[i]), src.packet_processing.variables.interpolate_color_damage(tyres_list[i])) for i in

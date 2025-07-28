@@ -53,4 +53,11 @@ class LapTableModel(GeneralTableModel):
         """
         self.sorted_players_list: list[Player] = sorted(PLAYERS_LIST)
         self._data = [player.lap_tab() for player in self.sorted_players_list if player.position != 0]
-        self.layoutChanged.emit()
+
+        if self.nb_players != len(self._data):
+            self.nb_players = len(self._data)
+            self.layoutChanged.emit()
+        else:
+            top_left = self.index(0, 0)
+            bottom_right = self.index(self.rowCount() - 1, self.columnCount() - 1)
+            self.dataChanged.emit(top_left, bottom_right, [Qt.DisplayRole])

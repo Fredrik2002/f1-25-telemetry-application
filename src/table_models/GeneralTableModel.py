@@ -22,7 +22,12 @@ class GeneralTableModel(QAbstractTableModel):
         self._data = data
         self.column_sizes = column_sizes
 
+        self.nb_players = len(self._data)
+
         self.table = QTableView()
+        self.table.setSelectionMode(QAbstractItemView.NoSelection)
+        self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.table.setFocusPolicy(Qt.NoFocus)
         self.create_table()
 
     def rowCount(self, parent=QModelIndex()):
@@ -47,7 +52,7 @@ class GeneralTableModel(QAbstractTableModel):
         return False
 
     def flags(self, index):
-        return Qt.ItemIsEnabled
+        return Qt.NoItemFlags
 
     def headerData(self, section, orientation, role):
         if role == Qt.DisplayRole:

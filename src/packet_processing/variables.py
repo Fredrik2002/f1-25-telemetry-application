@@ -75,7 +75,6 @@ created_map = False
 WIDTH_POINTS = 6
 button_list: list = ["Main Menu", "Damage", "Temperatures", "Laps", "Map", "ERS & Fuel", "Weather Forecast",
                               "Packet Reception"]
-POSITION_CHANGED = False
 REDRAW_MAP = True
 
 

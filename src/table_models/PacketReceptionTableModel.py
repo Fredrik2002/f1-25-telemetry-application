@@ -34,4 +34,7 @@ class PacketReceptionTableModel(GeneralTableModel):
             [packetDictionnary[i], str(self.parent.packet_reception_dict[i]) + "/s"]
             for i in range(len(packetDictionnary))
         ]
-        self.layoutChanged.emit()
+
+        top_left = self.index(0, 1)
+        bottom_right = self.index(self.rowCount() - 1, 1)
+        self.dataChanged.emit(top_left, bottom_right, [Qt.DisplayRole])

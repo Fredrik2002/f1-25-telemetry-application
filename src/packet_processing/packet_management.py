@@ -56,7 +56,7 @@ def update_lap_data(packet):  # Packet 2
         joueur.resultStatus = element.m_result_status
         joueur.lapDistance = element.m_lap_distance
 
-        if element.m_sector1_time_in_ms == 0 and joueur.currentSectors[0] != 0:  # On attaque un nouveau tour
+        if element.m_sector1_time_in_ms == 0 and joueur.currentSectors[0] != 0:  # We start a new lap
             joueur.lastLapSectors = joueur.currentSectors[:]
             joueur.lastLapSectors[2] = joueur.lastLapTime / 1_000 - joueur.lastLapSectors[0] - joueur.lastLapSectors[1]
 

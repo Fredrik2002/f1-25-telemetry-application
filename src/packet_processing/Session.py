@@ -68,7 +68,8 @@ class Session:
             string = f"Session : {session_dictionary[self.Session]}, Lap : {self.currentLap}/{self.nbLaps}, " \
                         f"Air : {self.airTemperature}°C / Track : {self.trackTemperature}°C"
         elif self.Session in [5, 6, 7, 8, 9]:
-            string = f" Qualy : {src.packet_processing.variables.format_minutes(self.time_left)}"
+            string = (f" {session_dictionary[self.Session]} : "
+                      f"{src.packet_processing.variables.format_minutes(self.time_left)}")
         else:
             string = f" FP : {src.packet_processing.variables.format_minutes(self.time_left)}"
         return string

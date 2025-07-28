@@ -25,7 +25,7 @@ orange = QColor("#FF9300")
 
 
 tyres_dictionnary = {
-    0:"S",
+    0: "S",
     16: "S",
     17: "M",
     18: "H",
@@ -146,8 +146,15 @@ session_dictionary = {
     5: "Q1",
     6: "Q2",
     7: "Q3",
-    8: "Short qualy",
-    15: "Race"
+    8: "Short Qualifying",
+    9: "One-Shot Qualifying",
+    10: "Sprint Shootout 1",
+    11: "Sprint Shootout 2",
+    12: "Sprint Shootout 3",
+    13: "Short Sprint Shootout",
+    14: "One-Shot Sprint Shootout",
+    15: "Race",
+    18: "Time Trial"
 
 }
 
