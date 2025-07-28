@@ -19,8 +19,10 @@ from src.table_models.utils import MultiTextDelegate
 class LapTableModel(GeneralTableModel):
     def __init__(self):
         data = [player.lap_tab() for player in PLAYERS_LIST if player.position != 0]
-        header = ["Pos", "Driver", "", "Current Lap", "Last Lap", "Fastest Lap"]
-        column_sizes = [4, 15, 1, 25, 25, 25]
+        header = ["Pos", "Driver", "", "Fastest Lap", "Last Lap", "S1", "S2", "S3", "Fastest Lap\nS1",
+                  "Fastest Lap\nS2", "Fastest Lap\nS3", "Last Lap\nS1",
+                  "Last Lap\nS2", "Last Lap\nS3"]
+        column_sizes = [4, 15, 1, 12, 12, 8, 8, 8, 12, 12, 12, 10, 10, 10]
         super().__init__(header, data, column_sizes)
 
         self.sorted_players_list: list[Player] = sorted(PLAYERS_LIST)

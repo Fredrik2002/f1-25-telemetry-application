@@ -54,7 +54,7 @@ def update_lap_data(packet):  # Packet 2
         joueur.penalties = element.m_penalties
         joueur.warnings = element.m_corner_cutting_warnings
         joueur.speed_trap = round(element.m_speedTrapFastestSpeed, 2)
-        joueur.currentLapTime = element.m_current_lap_time_in_ms
+        joueur.currentLapTime = element.m_current_lap_time_in_ms/1000
         joueur.gap_to_car_ahead = element.m_deltaToCarInFrontMSPart/1_000
         joueur.currentLapInvalid = element.m_current_lap_invalid
         joueur.resultStatus = element.m_result_status
@@ -65,11 +65,11 @@ def update_lap_data(packet):  # Packet 2
             joueur.lastLapSectors[2] = joueur.lastLapTime / 1_000 - joueur.lastLapSectors[0] - joueur.lastLapSectors[1]
 
         joueur.currentSectors = [element.m_sector1_time_in_ms / 1000, element.m_sector2_time_in_ms / 1000, 0]
-        if joueur.fastestLapTime > element.m_last_lap_time_in_ms != 0 or joueur.fastestLapTime == 0:
-            joueur.fastestLapTime = element.m_last_lap_time_in_ms
+        if joueur.bestLapTime > element.m_last_lap_time_in_ms != 0 or joueur.bestLapTime == 0:
+            joueur.bestLapTime = element.m_last_lap_time_in_ms
             joueur.bestLapSectors = joueur.lastLapSectors[:]
-        if joueur.fastestLapTime < session.fastestLapTime and element.m_last_lap_time_in_ms != 0 or joueur.fastestLapTime == 0:
-            session.fastestLapTime = joueur.fastestLapTime
+        if joueur.bestLapTime < session.bestLapTime and element.m_last_lap_time_in_ms != 0 or joueur.bestLapTime == 0:
+            session.bestLapTime = joueur.bestLapTime
             session.idxBestLapTime = index
         if element.m_car_position == 1:
             session.currentLap = mega_array[index].m_current_lap_num

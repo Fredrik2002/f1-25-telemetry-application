@@ -32,7 +32,7 @@ class Player:
         self.worldPositionZ = 0
         self.penalties = 0
         self.driverStatus = 0
-        self.fastestLapTime = 0
+        self.bestLapTime = 0
         self.drs: int = 0
         self.DRS_allowed : int = 0
         self.DRS_activation_distance : int = 0
@@ -78,13 +78,23 @@ class Player:
         self.bestLapSectors = [0] * 3
         self.lastLapTime = 0
         self.currentSectors = [0] * 3
-        self.fastestLapTime = 0
+        self.bestLapTime = 0
 
     def show_gap(self):
         if self.gap_to_car_ahead == 0:
             return ""
         else:
             return "+" + '%.3f'% self.gap_to_car_ahead + "s"
+
+    def show_current_lap(self):
+        if self.currentSectors[0] == 0:
+            return "%.3f" % (self.currentLapTime), "-", "-"
+        elif self.currentSectors[1] == 0:
+            return "%.3f" % self.currentSectors[0], "%.3f" % (self.currentLapTime-self.currentSectors[0]), "-"
+        else:
+            return ("%.3f" % self.currentSectors[0], "%.3f" % self.currentSectors[1],
+                    "%.3f" % (self.currentLapTime - self.currentSectors[0] - self.currentSectors[1]))
+
 
     def show_tyres_list_damage(self, tyres_list):
         return [(str(tyres_list[i]), src.packet_processing.variables.interpolate_color_damage(tyres_list[i])) for i in
@@ -129,10 +139,11 @@ class Player:
 
     def lap_tab(self):
         return [self.position, self.name, tyres_dictionnary[self.tyres],
-                f"{src.packet_processing.variables.format_milliseconds(self.currentLapTime)} [{', '.join('%.3f' % truc for truc in self.currentSectors)}]",
-                f"{src.packet_processing.variables.format_milliseconds(self.lastLapTime)} [{', '.join('%.3f' % truc for truc in self.lastLapSectors)}]",
-                f"{src.packet_processing.variables.format_milliseconds(self.fastestLapTime)} [{', '.join('%.3f' % truc for truc in self.bestLapSectors)}]",
-                ]
+                src.packet_processing.variables.format_milliseconds(self.bestLapTime),
+                src.packet_processing.variables.format_milliseconds(self.lastLapTime),
+                *self.show_current_lap(),
+                *('%.3f' % truc for truc in self.bestLapSectors),
+                *('%.3f' % truc for truc in self.lastLapSectors)]
 
     def temperature_tab(self):
         return [self.position, self.name, tyres_dictionnary[self.tyres],

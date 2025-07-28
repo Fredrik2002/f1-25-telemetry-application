@@ -17,7 +17,7 @@ class Session:
         self.track = -1
         self.marshalZones = []
         self.idxBestLapTime = -1
-        self.fastestLapTime = 5000
+        self.bestLapTime = 5000
         self.safetyCarStatus = 0
         self.trackLength = 1
         self.weatherList: list[WeatherForecastSample] = []
