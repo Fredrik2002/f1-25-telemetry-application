@@ -30,7 +30,7 @@ class Session:
         self.segments = []
         self.num_marshal_zones = 0
         self.packet_received = [0]*14
-        self.anyYellow = False
+        self.flag = ""
 
     def show_weather_sample(self, i):
         if self.weatherList[i].m_air_temperature_change == 0:
@@ -65,14 +65,14 @@ class Session:
         if self.Session == 18:
             string = f"Time Trial : {track_dictionary[self.track][0]}"
         elif self.Session in [15, 16, 17]:
-            string = f"Session : {session_dictionary[self.Session]}, Lap : {self.currentLap}/{self.nbLaps}, " \
+            string = f" {session_dictionary[self.Session]}, Lap : {self.currentLap}/{self.nbLaps}, " \
                         f"Air : {self.airTemperature}°C / Track : {self.trackTemperature}°C"
         elif self.Session in [5, 6, 7, 8, 9]:
             string = (f" {session_dictionary[self.Session]} : "
                       f"{src.packet_processing.variables.format_minutes(self.time_left)}")
         else:
             string = f" FP : {src.packet_processing.variables.format_minutes(self.time_left)}"
-        return string
+        return self.flag + " " + string + " " + self.flag
 
     def update_marshal_zones(self, map_canvas):
         for i in range(len(self.segments)):

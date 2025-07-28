@@ -67,4 +67,5 @@ def update_map(map_canvas):
 
     for i in range(len(session.segments)):
         map_canvas.itemconfig(session.segments[i], fill=color_flag_dict[session.marshalZones[i].m_zone_flag])
-    session.anyYellow = any(item.m_zone_flag == 3 for item in session.marshalZones)
+
+

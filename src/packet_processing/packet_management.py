@@ -24,6 +24,13 @@ def update_session(packet):  # Packet 1
         src.packet_processing.variables.REDRAW_MAP = True
     session.Session = packet.m_session_type
     session.marshalZones = packet.m_marshal_zones  # Array[21]
+    session.flag = ""
+    for element in session.marshalZones:
+        if element.m_zone_flag == 3:
+            session.flag = "🟡"
+            break
+        elif element.m_zone_flag == 1:
+            session.flag = "🟢"
     session.marshalZones[0].m_zone_start = session.marshalZones[0].m_zone_start - 1
     session.num_marshal_zones = packet.m_num_marshal_zones
     session.safetyCarStatus = packet.m_safety_car_status
@@ -35,14 +42,11 @@ def update_session(packet):  # Packet 1
 
 
 def update_lap_data(packet):  # Packet 2
-    global POSITION_CHANGED
     mega_array = packet.m_lap_data
     for index in range(22):
         element = mega_array[index]
         joueur = PLAYERS_LIST[index]
 
-        if joueur.position != element.m_car_position:
-            POSITION_CHANGED = True
         joueur.position = element.m_car_position
         joueur.lastLapTime = round(element.m_last_lap_time_in_ms, 3)
         joueur.pit = element.m_pit_status
