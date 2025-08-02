@@ -23,6 +23,8 @@ class ERSAndFuelTableModel(GeneralTableModel):
         column_sizes = [4, 20, 1, 8, 15, 15, 10]
         super().__init__(header, data, column_sizes)
 
+        self.sorted_players_list: list[Player] = sorted(PLAYERS_LIST)
+
     def data(self, index, role=Qt.DisplayRole):
         if role == Qt.DisplayRole:
             return self._data[index.row()][index.column()]

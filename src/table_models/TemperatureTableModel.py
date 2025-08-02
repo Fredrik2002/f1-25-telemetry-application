@@ -21,7 +21,7 @@ class TemperatureTableModel(GeneralTableModel):
         data = [player.temperature_tab() for player in PLAYERS_LIST if player.position != 0]
         header = ["Pos", "Driver", "Tyres", "Tyres Surface\nTemperatures",
                          "Tyres Inner\nTemperatures"]
-        column_sizes = [8, 20, 8, 12, 12]
+        column_sizes = [8, 20, 8, 20, 20]
         super().__init__(header, data, column_sizes)
 
         self.sorted_players_list : list[Player] = sorted(PLAYERS_LIST)

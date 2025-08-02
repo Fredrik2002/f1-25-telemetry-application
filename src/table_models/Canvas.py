@@ -9,8 +9,8 @@ import src
 
 class Canvas(QWidget):
     PADDING = 30
-    RADIUS = 3
-    FONT = QFont("Arial", 12)
+    RADIUS = 2
+    FONT = QFont("Arial", 10)
 
     def __init__(self):
         super().__init__()

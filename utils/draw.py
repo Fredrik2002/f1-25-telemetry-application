@@ -1,5 +1,11 @@
-from src.parsers.parser2023 import Listener
-track = "portimao"
+import sys
+import os
+
+# Ajouter le dossier parent au PYTHONPATH
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from src.parsers.parser2025 import Listener
+track = "silverstone"
 
 PORT=20777
 file=open(f"../tracks/{track}_2020_racingline.txt", "a")

@@ -15,7 +15,7 @@ class WeatherForecastTableModel(GeneralTableModel):
     def __init__(self):
         data = [session.show_weather_sample(i) for i in range(session.nb_weatherForecastSamples)]
         header = ["Session", "Time\nOffset", "Rain %", "Weather", "Air\nTemperature", "Track\nTemperature"]
-        column_sizes = [15, 10, 8, 8, 8, 8]
+        column_sizes = [20, 10, 8, 8, 8, 8]
         super().__init__(header, data, column_sizes)
 
         self.label_weather_accuracy = QLabel(
