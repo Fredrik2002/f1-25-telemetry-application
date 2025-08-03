@@ -19,8 +19,8 @@ from src.table_models.utils import MultiTextDelegate
 class ERSAndFuelTableModel(GeneralTableModel):
     def __init__(self):
         data = [player.ers_and_fuel_tab() for player in PLAYERS_LIST if player.position != 0]
-        header = ["Pos", "Driver", "", "ERS", "ERS Mode", "Fuel", "Fuel Mix"]
-        column_sizes = [4, 20, 1, 8, 15, 15, 10]
+        header = ["Pos", "Driver", "", "ERS", "ERS Mode", "Fuel", "Fuel Mix", "Speed Trap\nSpeed", "Speed Trap\n Position"]
+        column_sizes = [4, 20, 1, 8, 15, 15, 10, 15, 15]
         super().__init__(header, data, column_sizes)
 
         self.sorted_players_list: list[Player] = sorted(PLAYERS_LIST)

@@ -71,7 +71,7 @@ class GeneralTableModel(QAbstractTableModel):
         self.table.setWordWrap(True)
 
         for i in range(len(self._header)):
-            if self._header[i] in ["Tyres\nBlister", "Tyres\nWear"]:
+            if self._header[i] in ["Tyres Wear\nLast Lap", "Tyres\nWear"]:
                 self.table.setItemDelegateForColumn(i, MultiTextDelegate(self.table))
 
         self.table.verticalHeader().setVisible(False)

@@ -49,6 +49,7 @@ Open the F1 Game :
 
 
 ## ✏️ To-do list <a id="to-do-list"></a>
+* Rajouter la vitesse au speed trap
 * Fix the issue with weather Forecast Sample in 100% (Too many samples ?)
 * Improve the overall appearance of the app (flag apparition, title)
 * Track a bug where all not cars are shown in the minimap during full qualifying session

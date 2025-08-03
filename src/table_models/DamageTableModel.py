@@ -20,7 +20,7 @@ class DamageTableModel(GeneralTableModel):
     def __init__(self):
         data = [player.damage_tab() for player in PLAYERS_LIST if player.position != 0]
         header = ["Pos", "Driver", "", "Tyres\nAge", "Wear/\nLap", "Tyres\nWear",
-                         "Tyres\nBlister", "FW\nDmg",
+                         "Tyres Wear\nLast Lap", "FW\nDmg",
                   "RW\nDmg", "Floor\nDmg", "Diffuser\nDamage", "Sidepod\nDamage"]
         column_sizes = [5, 20, 1, 6, 10, 13, 13, 6, 6, 6, 10, 10]
         super().__init__(header, data, column_sizes)

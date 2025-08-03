@@ -45,7 +45,7 @@ def update_lap_data(packet):  # Packet 2
     mega_array = packet.m_lap_data
     for index in range(22):
         element = mega_array[index]
-        joueur = PLAYERS_LIST[index]
+        joueur : Player = PLAYERS_LIST[index]
 
         joueur.position = element.m_car_position
         joueur.lastLapTime = round(element.m_last_lap_time_in_ms, 3)
@@ -59,10 +59,13 @@ def update_lap_data(packet):  # Packet 2
         joueur.currentLapInvalid = element.m_current_lap_invalid
         joueur.resultStatus = element.m_result_status
         joueur.lapDistance = element.m_lap_distance
+        joueur.speedTrapSpeed = element.m_speedTrapFastestSpeed
 
         if element.m_sector1_time_in_ms == 0 and joueur.currentSectors[0] != 0:  # We start a new lap
             joueur.lastLapSectors = joueur.currentSectors[:]
             joueur.lastLapSectors[2] = joueur.lastLapTime / 1_000 - joueur.lastLapSectors[0] - joueur.lastLapSectors[1]
+            joueur.tyre_wear_on_last_lap = ['%.2f' % (float(a)-float(b)) for a,b in zip(joueur.tyre_wear, joueur.tyre_wear_before_last_lap)]
+            joueur.tyre_wear_before_last_lap = joueur.tyre_wear[:]
 
         joueur.currentSectors = [element.m_sector1_time_in_ms / 1000, element.m_sector2_time_in_ms / 1000, 0]
         if joueur.bestLapTime > element.m_last_lap_time_in_ms != 0 or joueur.bestLapTime == 0:
@@ -74,6 +77,10 @@ def update_lap_data(packet):  # Packet 2
         if element.m_car_position == 1:
             session.currentLap = mega_array[index].m_current_lap_num
             session.tour_precedent = session.currentLap - 1
+
+    players_speed_trap_sorted = sorted(PLAYERS_LIST, key=lambda player: player.speedTrapSpeed, reverse=True)
+    for pos, player in enumerate(players_speed_trap_sorted):
+        player.speedTrapPosition = pos+1
 
 
 def update_event(packet, qlist : QListWidget):  # Packet 3

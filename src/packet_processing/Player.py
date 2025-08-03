@@ -9,6 +9,8 @@ class Player:
     def __init__(self):
         self.position: int = 1
         self.tyre_wear = ["0.00", "0.00", "0.00", "0.00"]
+        self.tyre_wear_on_last_lap = ["0.00", "0.00", "0.00", "0.00"]
+        self.tyre_wear_before_last_lap = ["0.00", "0.00", "0.00", "0.00"]
         self.tyre_blisters = ["0.00", "0.00", "0.00", "0.00"]
         self.tyres = 0
         self.warnings = 0
@@ -59,6 +61,8 @@ class Player:
         self.resultStatus = 0
         self.networkId = 0
         self.lapDistance = 0
+        self.speedTrapSpeed = 0
+        self.speedTrapPosition = -1
 
     def __str__(self):
         return self.name + str(self.position)
@@ -105,7 +109,6 @@ class Player:
         trackPourcentage = self.lapDistance / src.packet_processing.variables.session.trackLength
         return str(round(float(max_wear) / (self.tyresAgeLaps+trackPourcentage+0.001), 2)) + "%"
 
-
     def show_tyres_list(self, tyres_list):
         return f"{tyres_list[2]} {tyres_list[3]} \n{tyres_list[0]} {tyres_list[1]}"
 
@@ -126,6 +129,10 @@ class Player:
         else:
             return ""
 
+######################################
+############## TABS ##################
+######################################
+
     def main_tab(self):
         return [self.position, self.name, tyres_dictionnary[self.tyres], self.tyresAgeLaps,
                 self.show_gap(), str(self.ERS_pourcentage) + '%', ERS_dictionary[self.ERS_mode], self.warnings,
@@ -134,7 +141,7 @@ class Player:
     def damage_tab(self):
         return [self.position, self.name, tyres_dictionnary[self.tyres], self.tyresAgeLaps,
                 self.get_average_tyre_wear(), self.show_tyres_list_damage(self.tyre_wear),
-                self.show_tyres_list_damage(self.tyre_blisters), self.show_front_wing_damage(),
+                self.show_tyres_list_damage(self.tyre_wear_on_last_lap), self.show_front_wing_damage(),
                 self.rearWingDamage, self.floorDamage, self.diffuserDamage, self.sidepodDamage]
 
     def lap_tab(self):
@@ -151,21 +158,13 @@ class Player:
 
     def ers_and_fuel_tab(self):
         return [self.position, self.name, tyres_dictionnary[self.tyres], str(self.ERS_pourcentage) + '%',
-                ERS_dictionary[self.ERS_mode], self.show_fuel(), fuel_dict[self.fuelMix]]
+                ERS_dictionary[self.ERS_mode], self.show_fuel(), fuel_dict[self.fuelMix],
+                '%.2f' % self.speedTrapSpeed +"km/h", self.speedTrapPosition]
 
 
     def is_not_on_lap(self):
         return self.currentLapTime == 0 or (self.yourTelemetry==1 and self.ERS_mode == 0) or \
                (self.currentSectors[0] + 1 > self.bestLapSectors[0] != 0) or \
                (self.currentSectors[1] + 1 > self.bestLapSectors[1] != 0)
-
-    def gestion_qualif(self, MnT_team):
-        if MnT_team is None:
-            return "black"
-        else:
-            if self.teamId == MnT_team:
-                return "blue"
-            else:
-                return "green" if self.is_not_on_lap() else "red"
 
 
